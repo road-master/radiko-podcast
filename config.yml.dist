@@ -1,0 +1,15 @@
+# エリア ID (詳細は "ISO 3166-2:JP" で検索)
+area_id: JP13
+# 同時に実行するアーカイブのプロセス数
+number_process: 3
+# アーカイブするファイルが既に存在した場合、コマンドの実行を停止するかどうか
+# true: 既に存在したファイルは上書きせず、他の番組のアーカイブを続けます
+# false: コマンドの実行を停止します
+stop_if_file_exists: false
+# いずれかのキーワードで見つかった番組をアーカイブします
+# 検索対象の情報は番組名のみです
+keywords:
+  - "SAISON CARD TOKIO HOT 100"
+  - "K's Transmission"
+  - "ROPPONGI PASSION PIT"
+  - "カフェイン11"

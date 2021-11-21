@@ -1,0 +1,60 @@
+[tool.isort]
+# @see https://github.com/timothycrosley/isort/issues/694#issuecomment-581246882
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+line_length = 120
+
+# @see https://black.readthedocs.io/en/stable/pyproject_toml.html#configuration-format
+[tool.black]
+line-length = 120
+
+[tool.pylint.basic]
+docstring-min-length = "7"
+
+[tool.pylint.format]
+max-line-length = "120"
+
+[tool.pylint.messages_control]
+# bad-continuation: @see https://github.com/PyCQA/pylint/pull/3571
+disable = ''',
+    bad-continuation,
+    '''
+
+[tool.pylint.options]
+# Since this rule against single responsibility principle.
+# @see https://stackoverflow.com/questions/28722314/why-does-pylint-want-2-public-methods-per-class/40258006#40258006
+min-public-methods = "1"
+ignore-comments = false
+
+[tool.pylint.typecheck]
+ignored-classes = [
+    "scoped_session",  # @see https://stackoverflow.com/questions/59214324/flask-error-db-scoped-session-instance-of-scoped-session-has-no-commit-mem/59214469#59214469
+]
+
+[tool.mypy]
+plugins = [
+    "sqlalchemy.ext.mypy.plugin"
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "factory",
+    "ffmpeg",
+    "inflector",
+    "invoke.*"
+]
+ignore_missing_imports = true
+
+[tool.tox]
+# see: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#tox-automation-project
+# Now we are avoiding to use tox-pipenv since we want to define only Pipenv as deps in tox.
+legacy_tox_ini = """
+[testenv]
+deps = pipenv
+commands=
+    pipenv install --skip-lock --dev
+    pytest tests
+"""

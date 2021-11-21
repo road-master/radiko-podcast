@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  radiko-podcast:
+    build:
+      context: .
+    image: mstmelody/radiko-podcast:development
+    volumes:
+      - ./config.yml:/workspace/config.yml
+      - ./output:/workspace/output

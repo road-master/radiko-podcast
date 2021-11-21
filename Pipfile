@@ -1,0 +1,51 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+bump2version = "*"
+# Hotfix for Pipenv's Bug @see https://github.com/pypa/pipenv/issues/4101
+colorama = "*"
+coverage = "*"
+factory-boy = "*"
+flake8 = "*"
+invoke = "*"
+isort = "*"
+# To generate xml response from template for mocking radiko API
+jinja2 = "*"
+mypy = "*"
+# To graduate discussion about detailed code style of Python
+pipenv-setup = "*"
+pylint = "*"
+# To test
+pytest = "*"
+pytest-asyncio = "*"
+pytest-freezegun = "*"
+pytest-mock = "*"
+pytest-resource-path = "*"
+radikopodcast = {editable = true, path = "."}
+radon = "*"
+requests-mock = "*"
+tox = "*"
+sqlalchemy2-stubs = "==0.0.2a19"
+types-freezegun = "*"
+types-requests = "*"
+types-setuptools = "*"
+xenon = "*"
+
+[packages]
+# To validate XML from radiko API
+errorcollector = "*"
+# To control ffmpeg by Python
+ffmpeg-python = "*"
+# To intaract with radiko API to get media playlist
+radikoplaylist = "*"
+# To use YAML config file for list of programs to archive
+yamldataclassconfig = "*"
+# To manage radiko programs by database (now using SQLite)
+sqlalchemy = "*"
+# To generate table name by model class name
+inflector = "*"
+asynccpu = "*"
+asyncffmpeg = "*"

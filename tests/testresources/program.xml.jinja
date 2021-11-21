@@ -1,0 +1,45 @@
+<radiko>
+        <ttl>1800</ttl>
+        <srvtime>1611145022</srvtime>
+        <stations>
+
+{% for station in list_station %}
+
+                <station id="{{ station.id }}">
+                <name>{{ station.name }}</name>
+
+
+                        <progs>
+                                <date>{{ station.date }}</date>
+{% for program in station.list_program %}
+
+                                        <prog id="{{ program.id }}" master_id="" ft="{{ program.ft }}" to="{{ program.to }}" ftl="{{ program.ftl }}" tol="{{ program.tol }}" dur="{{ program.duration }}">
+                                                <title>{{ program.title }}</title>
+                                                <url>{{ program.url }}</url>
+                                                <failed_record>0</failed_record>
+                                                <ts_in_ng>0</ts_in_ng>
+                                                <ts_out_ng>0</ts_out_ng>
+                                                <desc>{{ program.description }}</desc>
+                                                <info>{{ program.information }}</info>
+                                                <pfm>{{ program.performer }}</pfm>
+                                                <img>{{ program.image }}</img>
+                                                {% if program.tags %}
+                                                <tag>{% for tag in program.tags %}<item><name>ラジド</name></item>{% endfor %}</tag>
+                                                {% else %}
+                                                <tag />
+                                                {% endif %}
+                                                <genre>{% if program.genre_personality %}<personality id="{{ program.genre_personality.id }}"><name>{{ program.genre_personality.name }}</name></personality>{% endif %}{% if program.genre_program %}<program id="{{ program.genre_program.id }}"><name>{{ program.genre_program.name }}</name></program>{% endif %}</genre>
+                                                <metas>
+<meta name="twitter" value="#radiko" />
+                                                </metas>
+                                        </prog>
+{% endfor %}
+
+                        </progs>
+
+
+                </station>
+{% endfor %}
+
+        </stations>
+</radiko>
