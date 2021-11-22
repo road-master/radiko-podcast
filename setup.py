@@ -57,6 +57,6 @@ setup(
     package_data={"radikopodcast": ["py.typed"], "tests": ["*"]},
     python_requires=">=3.9",
     url="https://github.com/road-master/radiko-podcast",
-    version="1.0.0",
+    version="1.0.1",
     zip_safe=False,
 )
