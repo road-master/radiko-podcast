@@ -37,6 +37,7 @@ setup(
     exclude_package_data={"": ["__pycache__", "*.py[co]", ".pytest_cache"]},
     include_package_data=True,
     install_requires=[
+        "click",
         "errorcollector",
         "ffmpeg-python",
         "radikoplaylist",

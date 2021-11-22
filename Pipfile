@@ -35,6 +35,8 @@ types-setuptools = "*"
 xenon = "*"
 
 [packages]
+# To implement commandline tool efficiently
+click = "*"
 # To validate XML from radiko API
 errorcollector = "*"
 # To control ffmpeg by Python
