@@ -4,19 +4,41 @@ verify_ssl = true
 name = "pypi"
 
 [dev-packages]
+autoflake = "*"
+bandit = {version = "*", markers="python_version >= '3.7'"}
+black = {version = "*", markers="python_version >= '3.7'"}
+build = "*"
 bump2version = "*"
-# Hotfix for Pipenv's Bug @see https://github.com/pypa/pipenv/issues/4101
+cohesion = "*"
+# Hotfix for Pipenv's Bug:
+# - Pipenv should prioritize more cross-platform sys_platform condition between packages when lock
+#   · Issue #4101 · pypa/pipenv
+#   https://github.com/pypa/pipenv/issues/4101
 colorama = "*"
-coverage = "*"
+# Since coverage 3.5.3 stops Pipenv locking:
+# - Command: "pipenv install --skip-lock" fails
+#   since it tries to parse legacy package metadata and raise InstallError
+#   · Issue #5595 · pypa/pipenv
+#   https://github.com/pypa/pipenv/issues/5595
+coverage = ">=3.5.4"
+dlint = "*"
+docformatter = {extras = ["tomli"], version = "*"}
+dodgy = "*"
 factory-boy = "*"
-flake8 = "*"
-invoke = "*"
+# Since Pipenv can't lock for too much combinations to attempt lock:
+# pip._vendor.resolvelib.resolvers.ResolutionTooDeep: 2000000
+flake8 = {version = "==4.0.1", markers="python_version >= '3.6'"}
+# To use flake8 --radon-show-closures
+flake8-polyfill = "*"
+# Latest hacking depends on legacy version of flake8, and legacy hacking doesn't narrow flake8 version.
+# When unpin hacking, it has possibility to install too legacy version of hacking.
+hacking = {version = ">=5.0.0", markers="python_version >= '3.8'"}
+invokelint = {version = "*", markers="python_version >= '3.7'"}
 isort = "*"
 # To generate xml response from template for mocking radiko API
 jinja2 = "*"
 mypy = "*"
-# To graduate discussion about detailed code style of Python
-pipenv-setup = "*"
+pydocstyle = {version = "*", markers="python_version >= '3.6'"}
 pylint = "*"
 # To test
 pytest = "*"
@@ -24,12 +46,16 @@ pytest-asyncio = "*"
 pytest-freezegun = "*"
 pytest-mock = "*"
 pytest-resource-path = "*"
+pyvelocity = {version = "*", markers="python_version >= '3.9'"}
 radikopodcast = {editable = true, path = "."}
 radon = "*"
 requests-mock = "*"
-tox = "*"
+ruff = {version = "*", markers="python_version >= '3.7'"}
+semgrep = {version = "*", markers="python_version >= '3.6'"}
+tomli = {version = "*", markers="python_version >= '3.6'"}
 sqlalchemy2-stubs = "==0.0.2a19"
 types-freezegun = "*"
+types-invoke = "*"
 types-requests = "*"
 types-setuptools = "*"
 xenon = "*"
@@ -37,6 +63,10 @@ xenon = "*"
 [packages]
 # To implement commandline tool efficiently
 click = "*"
+# For Bandit warning:
+# - blacklist_imports — Bandit documentation
+#   https://bandit.readthedocs.io/en/1.7.4/blacklists/blacklist_imports.html#b405-import-xml-etree
+defusedxml = "*"
 # To validate XML from radiko API
 errorcollector = "*"
 # To control ffmpeg by Python
