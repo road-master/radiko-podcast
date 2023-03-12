@@ -17,6 +17,22 @@ class TestProgram:
     def test_is_empty() -> None:
         assert Program.is_empty(date(2021, 1, 16)) is False
 
+    @staticmethod
+    def test_to_string_none(model_program: Program) -> None:
+        model_program.to = None
+        with pytest.raises(ValueError, match="None") as excinfo:
+            # Reason: Property has logic. pylint: disable=pointless-statement
+            model_program.to_string
+        assert "None" in str(excinfo.value)
+
+    @staticmethod
+    def test_ft_string_none(model_program: Program) -> None:
+        model_program.ft = None
+        with pytest.raises(ValueError, match="None") as excinfo:
+            # Reason: Property has logic. pylint: disable=pointless-statement
+            model_program.ft_string
+        assert "None" in str(excinfo.value)
+
     @pytest.mark.usefixtures("record_program")
     def test_mark_archivable(self) -> None:
         """Method: mark_archivable() should update database record as status: archivable."""
@@ -34,5 +50,6 @@ class TestProgram:
         with SessionManager() as session:
             list_condition_keyword = [Program.title.like(f"%{keyword}%")]
             return cast(
-                Program, session.query(Program).filter(and_(*list_condition_keyword)).order_by(Program.ft.asc()).first()
+                Program,
+                session.query(Program).filter(and_(*list_condition_keyword)).order_by(Program.ft.asc()).first(),
             )

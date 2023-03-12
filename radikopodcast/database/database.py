@@ -2,11 +2,11 @@
 from logging import getLogger
 from typing import cast
 
-from sqlalchemy import inspect
 from sqlalchemy.engine.reflection import Inspector
+from sqlalchemy import inspect
 
-from radikopodcast import Session
 from radikopodcast.database.models import Base
+from radikopodcast import Session
 
 
 class Database:

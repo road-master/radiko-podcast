@@ -1,11 +1,11 @@
 """Tests for radiko_podcast.py."""
 import asyncio
-import sys
 from pathlib import Path
+import sys
 from unittest import mock
 
-import pytest
 from freezegun.api import freeze_time
+import pytest
 
 from radikopodcast.radiko_podcast import RadikoPodcast
 
@@ -15,7 +15,7 @@ class TestRadikoPodcast:
 
     @staticmethod
     @pytest.mark.skipif(sys.platform == "win32", reason="test for Linux only")
-    @pytest.mark.usefixtures("mock_all")
+    @pytest.mark.usefixtures("_mock_all")
     # Decorator: freeze_time without tick=True breaks EventLoop.run_in_executor().
     # This comment prevents Pylint duplicate-code.
     # see:
@@ -25,9 +25,11 @@ class TestRadikoPodcast:
     def test(config_yaml: Path) -> None:
         """RadikoPodcast should stop when raise KeyboardInterrupt."""
         podcast = RadikoPodcast(path_to_configuration=config_yaml)
-        with pytest.raises(KeyboardInterrupt):
-            with mock.patch.object(RadikoPodcast, "sleep", side_effect=KeyboardInterrupt):
-                podcast.run()
+        with (
+            pytest.raises(KeyboardInterrupt),
+            mock.patch.object(RadikoPodcast, "sleep", side_effect=KeyboardInterrupt),
+        ):
+            podcast.run()
 
     @staticmethod
     def test_sleep() -> None:

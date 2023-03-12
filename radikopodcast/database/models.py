@@ -1,24 +1,28 @@
 """This module implements SQLAlchemy database models."""
 from __future__ import annotations
 
-import datetime
 from abc import abstractmethod
 
 # Reason: For type hint. pylint: disable=unused-import
 from enum import IntEnum
-from typing import Generic, Iterable, List, TypeVar, cast
+from typing import cast, Generic, TYPE_CHECKING, TypeVar
 
 from inflector import Inflector
-from sqlalchemy import DATETIME, Column, String, and_, func, or_
+from sqlalchemy import and_, Column, DATETIME, func, or_, String
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import Mapped, relationship
-from sqlalchemy.orm.interfaces import MapperProperty
 from sqlalchemy.sql.schema import ForeignKey, MetaData
 from sqlalchemy.sql.sqltypes import DATE, INTEGER
 
 from radikopodcast.database.session_manager import SessionManager
 from radikopodcast.radiko_datetime import RadikoDatetime
 from radikopodcast.radikoxml.xml_parser import XmlParser, XmlParserProgram, XmlParserStation
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    import datetime
+
+    from sqlalchemy.orm.interfaces import MapperProperty
 
 
 class ArchiveStatusId(IntEnum):
@@ -45,40 +49,40 @@ class ModelInitByXml(Base, Generic[TypeVarXmlParser]):
     # Reason: @declared_attr marks method as class level.
     # see: https://docs.sqlalchemy.org/en/14/orm/mapping_api.html#class-mapping-api
     # pylint: disable=no-self-argument
-    def __tablename__(cls) -> MapperProperty[str]:
+    def __tablename__(cls) -> MapperProperty[str]:  # noqa: N805
         # Reason: "cls" is not instance.
         # pylint: disable=no-member
         return Inflector().pluralize(cls.__name__.lower())
 
-    def __init__(self, xml_parser: TypeVarXmlParser):
+    def __init__(self, xml_parser: TypeVarXmlParser) -> None:
         super().__init__()
         self.init(xml_parser)
 
     @abstractmethod
     def init(self, xml_parser: TypeVarXmlParser) -> None:
-        raise NotImplementedError()  # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
     @classmethod
-    def save_all(cls, models: "Iterable[TypeVarModelInitByXml]") -> None:
+    def save_all(cls, models: Iterable[TypeVarModelInitByXml]) -> None:
         """This method insert Store models into database."""
-        with SessionManager() as session:
-            with session.begin():
-                session.add_all(models)
+        with SessionManager() as session, session.begin():
+            session.add_all(models)
 
 
 # Reason: Mypy won't support TypeVar bounding generic type.
 # see:
 #  - `TypeVar`s cannot refer to type variables · Issue #2756 · python/mypy
 #    https://github.com/python/mypy/issues/2756#issuecomment-579496164
-TypeVarModelInitByXml = TypeVar("TypeVarModelInitByXml", bound=ModelInitByXml)  # type: ignore
+TypeVarModelInitByXml = TypeVar("TypeVarModelInitByXml", bound=ModelInitByXml)  # type: ignore[type-arg]
 
 
 class Station(ModelInitByXml[XmlParserStation]):
     """Station of radiko."""
 
-    id = Column(String(255), primary_key=True)
+    # Reason: Design of table column.
+    id = Column(String(255), primary_key=True)  # noqa: A003
     name = Column(String(255))
-    list_program: Mapped[List[Program]] = relationship("Program", backref="station")
+    list_program: Mapped[list[Program]] = relationship("Program", backref="station")
     transfer_target = Column(String(255))
 
     def init(self, xml_parser: XmlParserStation) -> None:
@@ -97,7 +101,7 @@ class Program(ModelInitByXml[XmlParserProgram]):
     """Program of radiko."""
 
     # Reason: Model. pylint: disable=too-many-instance-attributes
-    id = Column(String(255), primary_key=True)
+    id = Column(String(255), primary_key=True)  # noqa: A003
     to = Column(DATETIME)
     ft = Column(DATETIME)
     title = Column(String(255))
@@ -143,12 +147,16 @@ class Program(ModelInitByXml[XmlParserProgram]):
 
     @property
     def ft_string(self) -> str:
-        assert self.ft is not None
+        if not self.ft:
+            message = f"{self.ft=}"
+            raise ValueError(message)
         return RadikoDatetime.encode(self.ft)
 
     @property
     def to_string(self) -> str:
-        assert self.to is not None
+        if not self.to:
+            message = f"{self.to=}"
+            raise ValueError(message)
         return RadikoDatetime.encode(self.to)
 
     @staticmethod
@@ -158,14 +166,14 @@ class Program(ModelInitByXml[XmlParserProgram]):
             return count == (0,)
 
     @staticmethod
-    def find(keywords: List[str]) -> List[Program]:
+    def find(keywords: list[str]) -> list[Program]:
         """This method select Store model from database."""
         with SessionManager() as session:
             list_condition_keyword = [Program.title.like(f"%{keyword}%") for keyword in keywords]
             return (
                 session.query(Program)
                 .filter(
-                    and_(or_(*list_condition_keyword), Program.archive_status.is_(ArchiveStatusId.ARCHIVABLE.value))
+                    and_(or_(*list_condition_keyword), Program.archive_status.is_(ArchiveStatusId.ARCHIVABLE.value)),
                 )
                 .order_by(Program.ft.asc())
                 .all()

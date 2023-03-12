@@ -1,43 +1,55 @@
 """XML parsers."""
-from datetime import date, datetime
-from typing import Any, Callable, List
-from xml.etree import ElementTree
-from xml.etree.ElementTree import Element
+from typing import Any, Callable, TYPE_CHECKING
 
-# Reason: Following export method in __init__.py from Effective Python 2nd Edition item 85
-from errorcollector import MultipleErrorCollector  # type: ignore
+from defusedxml import ElementTree
+from errorcollector import MultipleErrorCollector
 
 from radikopodcast.exceptions import XmlParseError
 from radikopodcast.radiko_datetime import RadikoDatetime
 
+if TYPE_CHECKING:
+    from datetime import date, datetime
+
+    # Reason: The defusedxml's issue:
+    # - defusedxml lacks an Element class · Issue #48 · tiran/defusedxml
+    #   https://github.com/tiran/defusedxml/issues/48
+    # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # noqa: ERA001
+    from xml.etree.ElementTree import Element  # nosec B405
+
 
 class XmlParser:
-    """Abstruct XML parser."""
+    """Abstract XML parser."""
 
     def __init__(self) -> None:
-        self.list_error: List[XmlParseError] = []
+        self.list_error: list[XmlParseError] = []
 
-    # Reason: Parent method. pylint: disable=no-self-use
     @property
     def validate(self) -> bool:
         """This method validates data."""
         return bool(self.list_error)
 
     def stock_error(self, method: Callable[[], Any], message: str) -> Any:
-        """This method stocks error"""
+        """This method stocks error."""
         with MultipleErrorCollector(XmlParseError, message, self.list_error):
             return method()
 
     @staticmethod
-    def to_string(element: Element) -> str:
-        return ElementTree.tostring(element, encoding="unicode")
+    def to_string(element: "Element") -> str:
+        # Reason: The defusedxml's responsible.
+        return ElementTree.tostring(element, encoding="unicode")  # type: ignore[no-any-return]
 
 
 # Reason: This class converts argument of constructor to property. pylint: disable=too-few-public-methods
 class XmlParserProgram(XmlParser):
     """XML parser for program of radiko."""
 
-    def __init__(self, element_tree_program: Element, element_tree_station: Element, target_date: date, area_id: str):
+    def __init__(
+        self,
+        element_tree_program: "Element",
+        element_tree_station: "Element",
+        target_date: "date",
+        area_id: str,
+    ) -> None:
         super().__init__()
         self.element_tree_program = element_tree_program
         self.element_tree_station = element_tree_station
@@ -46,17 +58,17 @@ class XmlParserProgram(XmlParser):
 
     @property
     # Reason: "id" meets requirement of snake_case. pylint: disable=invalid-name
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         return self.element_tree_program.attrib["id"]
 
     @property
     # Reason: Can't understand what "ft" points. pylint: disable=invalid-name
-    def ft(self) -> datetime:
+    def ft(self) -> "datetime":
         return RadikoDatetime.decode(self.element_tree_program.attrib["ft"])
 
     @property
     # Reason: "to" meets requirement of snake_case. pylint: disable=invalid-name
-    def to(self) -> datetime:
+    def to(self) -> "datetime":
         return RadikoDatetime.decode(self.element_tree_program.attrib["to"])
 
     @property
@@ -64,9 +76,11 @@ class XmlParserProgram(XmlParser):
         """Title if find it, otherwise, raises error."""
         element_title = self.element_tree_program.find("title")
         if element_title is None:
-            raise XmlParseError(f"Can't find title. XML: {self.to_string(self.element_tree_program)}")
+            message = f"Can't find title. XML: {self.to_string(self.element_tree_program)}"
+            raise XmlParseError(message)
         if element_title.text is None:
-            raise XmlParseError(f"No title text. XML: {self.to_string(self.element_tree_program)}")
+            message = f"No title text. XML: {self.to_string(self.element_tree_program)}"
+            raise XmlParseError(message)
         return element_title.text
 
     @property
@@ -80,7 +94,8 @@ class XmlParserProgram(XmlParser):
         self.stock_error(lambda: self.to, f"Invalid to. XML: {self.to_string(self.element_tree_program)}")
         self.stock_error(lambda: self.title, f"Invalid title. XML: {self.to_string(self.element_tree_program)}")
         self.stock_error(
-            lambda: self.station_id, f"Invalid station id. XML: {self.to_string(self.element_tree_station)}"
+            lambda: self.station_id,
+            f"Invalid station id. XML: {self.to_string(self.element_tree_station)}",
         )
         return super().validate
 
@@ -89,19 +104,21 @@ class XmlParserProgram(XmlParser):
 class XmlParserStation(XmlParser):
     """XML parser for station of radiko."""
 
-    def __init__(self, element_tree_station: Element):
+    def __init__(self, element_tree_station: "Element") -> None:
         super().__init__()
         self.element_tree_station = element_tree_station
 
     @property
     # Reason: "id" meets requirement of snake_case. pylint: disable=invalid-name
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """ID if find it, otherwise, raises error."""
         element_id = self.element_tree_station.find("./id")
         if element_id is None:
-            raise XmlParseError(f"Can't find id. XML: {self.to_string(self.element_tree_station)}")
+            message = f"Can't find id. XML: {self.to_string(self.element_tree_station)}"
+            raise XmlParseError(message)
         if element_id.text is None:
-            raise XmlParseError(f"No id text. XML: {self.to_string(self.element_tree_station)}")
+            message = f"No id text. XML: {self.to_string(self.element_tree_station)}"
+            raise XmlParseError(message)
         return element_id.text
 
     @property
@@ -109,9 +126,11 @@ class XmlParserStation(XmlParser):
         """Name if find it, otherwise, raises error."""
         element_name = self.element_tree_station.find("./name")
         if element_name is None:
-            raise XmlParseError(f"Can't find name. XML: {self.to_string(self.element_tree_station)}")
+            message = f"Can't find name. XML: {self.to_string(self.element_tree_station)}"
+            raise XmlParseError(message)
         if element_name.text is None:
-            raise XmlParseError(f"No name text. XML: {self.to_string(self.element_tree_station)}")
+            message = f"No name text. XML: {self.to_string(self.element_tree_station)}"
+            raise XmlParseError(message)
         return element_name.text
 
     @property

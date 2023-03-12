@@ -1,26 +1,30 @@
-"""
-This module implements testing utility using SQLAlchemy and factory_boy.
+"""This module implements testing utility using SQLAlchemy and factory_boy.
+
 @see https://factoryboy.readthedocs.io/en/latest/orms.html#sqlalchemy
 """
 from dataclasses import dataclass
-from typing import Generator
+from typing import TYPE_CHECKING
 
 import factory
-from sqlalchemy.orm.session import Session as SQLAlchemySession
 
-from radikopodcast import Session
 from radikopodcast.database.models import Base, Program
 from radikopodcast.radikoxml.xml_parser import XmlParserProgram
+from radikopodcast import Session
 from tests.testlibraries.database_engine_manager import DatabaseEngineManager
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
+    from sqlalchemy.orm.session import Session as SQLAlchemySession
 
 
 # Since factory_boy lacks typing stub.
 # Error message: Class cannot subclass "SQLAlchemyModelFactory" (has type "Any")
-class ProgramFactory(factory.alchemy.SQLAlchemyModelFactory):  # type: ignore
+class ProgramFactory(factory.alchemy.SQLAlchemyModelFactory):  # type: ignore[misc]
     """Factory for Store model."""
 
     class Meta:  # Reason: Model. pylint: disable=too-few-public-methods
-        """Settings for factory_boy"""
+        """Settings for factory_boy."""
 
         model = Program
         sqlalchemy_session = Session
@@ -41,13 +45,13 @@ class DatabaseForTest:
     """This class implements methods about database for unit testing."""
 
     @classmethod
-    def database_session(cls) -> Generator[SQLAlchemySession, None, None]:
+    def database_session(cls) -> "Generator[SQLAlchemySession, None, None]":
         """This fixture prepares database session to reset database after each test."""
         with DatabaseEngineManager(Session):
             yield Session()
 
     @classmethod
-    def database_session_with_schema(cls) -> Generator[SQLAlchemySession, None, None]:
+    def database_session_with_schema(cls) -> "Generator[SQLAlchemySession, None, None]":
         """This fixture prepares database session and fixture records to reset database after each test."""
         with DatabaseEngineManager(Session) as engine:
             session = Session()

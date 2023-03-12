@@ -1,5 +1,5 @@
-from xml.etree import ElementTree
-
+"""Tests for xml_parser.py."""
+from defusedxml import ElementTree
 import pytest
 
 from radikopodcast.exceptions import XmlParseError
@@ -7,35 +7,45 @@ from radikopodcast.radikoxml.xml_parser import XmlParserProgram, XmlParserStatio
 
 
 class TestXmlParserStation:
+    """Tests for XmlParserStation."""
+
     @staticmethod
     @pytest.mark.parametrize(
-        "xml, expect",
+        ("xml", "expect"),
         [("<radiko />", "Can't find title. XML: "), ("<radiko><title /></radiko>", "No title text. XML: ")],
     )
     def test_xml_parser_program_title_error(xml: str, expect: str) -> None:
-        # To omit coding fixture
-        xml_parser_program = XmlParserProgram(ElementTree.fromstring(xml), None, None, "JP13")  # type: ignore
+        """XmlParserProgram should raise XmpParserError when XML is invalid."""
+        # Reason: To omit coding fixture
+        element_tree = ElementTree.fromstring(xml, forbid_dtd=True)
+        parser = XmlParserProgram(element_tree, None, None, "JP13")  # type: ignore[arg-type]
         with pytest.raises(XmlParseError) as excinfo:
-            xml_parser_program.title
+            # Reason: Property has logic. pylint: disable=pointless-statement
+            parser.title
         assert expect in str(excinfo.value)
 
     @staticmethod
     @pytest.mark.parametrize(
-        "xml, expect", [("<stations />", "Can't find id. XML: "), ("<stations><id /></stations>", "No id text. XML: ")]
+        ("xml", "expect"),
+        [("<stations />", "Can't find id. XML: "), ("<stations><id /></stations>", "No id text. XML: ")],
     )
     def test_xml_parser_station_id_error(xml: str, expect: str) -> None:
-        xml_parser_program = XmlParserStation(ElementTree.fromstring(xml))
+        """XmlParserProgram should raise XmpParserError when XML is invalid."""
+        xml_parser_program = XmlParserStation(ElementTree.fromstring(xml, forbid_dtd=True))
         with pytest.raises(XmlParseError) as excinfo:
+            # Reason: Property has logic. pylint: disable=pointless-statement
             xml_parser_program.id
         assert expect in str(excinfo.value)
 
     @staticmethod
     @pytest.mark.parametrize(
-        "xml, expect",
+        ("xml", "expect"),
         [("<stations />", "Can't find name. XML: "), ("<stations><name /></stations>", "No name text. XML: ")],
     )
     def test_xml_parser_station_name_error(xml: str, expect: str) -> None:
-        xml_parser_program = XmlParserStation(ElementTree.fromstring(xml))
+        """XmlParserProgram should raise XmpParserError when XML is invalid."""
+        xml_parser_program = XmlParserStation(ElementTree.fromstring(xml, forbid_dtd=True))
         with pytest.raises(XmlParseError) as excinfo:
+            # Reason: Property has logic. pylint: disable=pointless-statement
             xml_parser_program.name
         assert expect in str(excinfo.value)

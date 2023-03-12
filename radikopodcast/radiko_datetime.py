@@ -1,6 +1,8 @@
 """Datetime for radiko specification."""
 from datetime import date, datetime, timedelta, timezone
 
+JST = timezone(timedelta(hours=+9), "JST")
+
 
 class RadikoDatetime:
     """Datetime for radiko specification."""
@@ -13,7 +15,7 @@ class RadikoDatetime:
 
     @staticmethod
     def decode(argument_string: str) -> datetime:
-        return datetime.strptime(argument_string, RadikoDatetime.FORMAT_CODE)
+        return datetime.strptime(argument_string, RadikoDatetime.FORMAT_CODE).replace(tzinfo=JST)
 
     @staticmethod
     def time_free_oldest_date(now: datetime) -> date:
@@ -25,7 +27,7 @@ class RadikoDatetime:
 
     @staticmethod
     def now_jst() -> datetime:
-        return datetime.now(tz=timezone(timedelta(hours=+9), "JST"))
+        return datetime.now(tz=JST)
 
     @staticmethod
     def is_same_radiko_date(datetime_a: datetime, datetime_b: datetime) -> bool:
@@ -43,4 +45,4 @@ class RadikoDate:
 
     @staticmethod
     def decode(argument_string: str) -> date:
-        return datetime.strptime(argument_string, RadikoDate.FORMAT_CODE).date()
+        return datetime.strptime(argument_string, RadikoDate.FORMAT_CODE).replace(tzinfo=JST).date()

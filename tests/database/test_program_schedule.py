@@ -5,6 +5,7 @@ from datetime import datetime
 from freezegun import freeze_time
 
 from radikopodcast.database.program_schedule import ProgramSchedule
+from radikopodcast.radiko_datetime import JST
 
 
 class TestDatabase:
@@ -19,4 +20,4 @@ class TestDatabase:
 
     @staticmethod
     def test_has_downloaded() -> None:
-        assert not ProgramSchedule().has_downloaded(datetime(2021, 1, 7, 0, 0, 0))
+        assert not ProgramSchedule().has_downloaded(datetime(2021, 1, 7, 0, 0, 0, tzinfo=JST))

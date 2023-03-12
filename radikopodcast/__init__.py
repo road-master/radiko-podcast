@@ -17,6 +17,6 @@ Session = scoped_session(
         autoflush=False,
         # ↓ To use with-statement
         autocommit=True,
-    )
+    ),
 )
 CONFIG: Config = Config()
