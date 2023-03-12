@@ -64,7 +64,7 @@ xenon = "*"
 # To implement commandline tool efficiently
 click = "*"
 # For Bandit warning:
-# - blacklist_imports — Bandit documentation
+# - blacklist_imports - Bandit documentation
 #   https://bandit.readthedocs.io/en/1.7.4/blacklists/blacklist_imports.html#b405-import-xml-etree
 defusedxml = "*"
 # To validate XML from radiko API
