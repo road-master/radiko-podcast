@@ -1,10 +1,10 @@
 # radiko Podcast
 
 [![Test](https://github.com/road-master/radiko-podcast/workflows/Test/badge.svg)](https://github.com/road-master/radiko-podcast/actions?query=workflow%3ATest)
+[![CodeQL](https://github.com/road-master/radiko-podcast/workflows/CodeQL/badge.svg)](https://github.com/road-master/radiko-podcast/actions?query=workflow%3ACodeQL)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/9b52f1765b2e797d293d/test_coverage)](https://codeclimate.com/github/road-master/radiko-podcast/test_coverage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/9b52f1765b2e797d293d/maintainability)](https://codeclimate.com/github/road-master/radiko-podcast/maintainability)
 [![Code Climate technical debt](https://img.shields.io/codeclimate/tech-debt/road-master/radiko-podcast)](https://codeclimate.com/github/road-master/radiko-podcast)
-[![Updates](https://pyup.io/repos/github/road-master/radiko-podcast/shield.svg)](https://pyup.io/repos/github/road-master/radiko-podcast/)
 [![Python versions](https://img.shields.io/pypi/pyversions/radikopodcast.svg)](https://pypi.org/project/radikopodcast)
 [![Twitter URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Froad-master%2Fradiko-podcast)](http://twitter.com/share?text=radiko%20Podcast&url=https://pypi.org/project/radikopodcast/&hashtags=python)
 
