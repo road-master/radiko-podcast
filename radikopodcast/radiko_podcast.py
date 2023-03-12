@@ -1,17 +1,17 @@
 """Main module."""
 import asyncio
 import logging
-import queue
 from logging import LogRecord
 from pathlib import Path
+import queue
 from typing import Any, Callable, Optional
 
 # Reason: Following export method in __init__.py from Effective Python 2nd Edition item 85
-from asynccpu import ProcessTaskPoolExecutor  # type: ignore
+from asynccpu import ProcessTaskPoolExecutor
 
 from radikopodcast import CONFIG
 from radikopodcast.database.program_schedule import ProgramSchedule
-from radikopodcast.radiko_archiver import TIME_TO_FORCE_TERMINATION, RadikoArchiver
+from radikopodcast.radiko_archiver import RadikoArchiver, TIME_TO_FORCE_TERMINATION
 
 
 class RadikoPodcast:
@@ -28,9 +28,10 @@ class RadikoPodcast:
     ) -> None:
         logging.basicConfig(level=logging.DEBUG)
         # Reason Yaml Dataclass Config's bug.
-        CONFIG.load(path_to_configuration)  # type: ignore
+        CONFIG.load(path_to_configuration)  # type: ignore[arg-type]
         self.radiko_archiver = RadikoArchiver(
-            time_to_force_termination=time_to_force_termination, stop_if_file_exists=CONFIG.stop_if_file_exists
+            time_to_force_termination=time_to_force_termination,
+            stop_if_file_exists=CONFIG.stop_if_file_exists,
         )
         self.queue = queue
         self.configurer = configurer
@@ -38,11 +39,11 @@ class RadikoPodcast:
         self.logger = logging.getLogger(__name__)
 
     def run(self) -> None:
-        """Runs"""
+        """Runs."""
         try:
             asyncio.run(self.archive_repeatedly())
-        except Exception as error:
-            self.logger.exception(error)
+        except Exception:
+            self.logger.exception("Unexpected error raised!")
             raise
 
     async def archive_repeatedly(self) -> None:

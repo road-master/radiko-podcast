@@ -1,6 +1,5 @@
 """Configuration."""
 from dataclasses import dataclass, field
-from typing import List
 
 from yamldataclassconfig.config import YamlDataClassConfig
 
@@ -13,4 +12,4 @@ class Config(YamlDataClassConfig):
     area_id: str = "JP13"
     number_process: int = 3
     stop_if_file_exists: bool = False
-    keywords: List[str] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)

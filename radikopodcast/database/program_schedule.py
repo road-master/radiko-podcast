@@ -1,6 +1,6 @@
 """Program schedule."""
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from radikopodcast.database.database import Database
 from radikopodcast.database.models import Program, Station
@@ -14,6 +14,8 @@ class ProgramSchedule:
     """Program schedule."""
 
     AREA_ID_DEFAULT = "JP13"  # TOKYO
+    HOUR_WHEN_RADIKO_PROGRAM_UPDATE = 5
+    MINUTE_MARGIN_WHEN_RADIKO_PROGRAM_UPDATE = 15
 
     def __init__(self, *, area_id: str = AREA_ID_DEFAULT) -> None:
         # pylint bug, see: https://github.com/PyCQA/pylint/issues/3882
@@ -25,7 +27,7 @@ class ProgramSchedule:
             Station.save_all(XmlConverterStation(RadikoApi(area_id=self.area_id).get_station()).to_model())
 
     @staticmethod
-    def search(keywords: List[str]) -> List[Program]:
+    def search(keywords: list[str]) -> list[Program]:
         return Program.find(keywords)
 
     def download_if_program_has_not_been_downloaded(self) -> None:
@@ -40,8 +42,8 @@ class ProgramSchedule:
         return (
             self.last_updated is not None
             and RadikoDatetime.is_same_radiko_date(now, self.last_updated)
-            or now.hour == 5
-            and now.minute <= 15
+            or now.hour == self.HOUR_WHEN_RADIKO_PROGRAM_UPDATE
+            and now.minute <= self.MINUTE_MARGIN_WHEN_RADIKO_PROGRAM_UPDATE
         )
 
     def add(self, now: datetime) -> None:

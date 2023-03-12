@@ -19,16 +19,43 @@
 	// connected. This is typically a file mount in .devcontainer/docker-compose.yml
 	"workspaceFolder": "/workspace",
 
-	// Set *default* container specific settings.json values on container create.
-	"settings": {},
-
-	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": [
-		"ms-python.python",
-		"littlefoxteam.vscode-python-test-adapter",
-		"alexcvzz.vscode-sqlite",
-		"streetsidesoftware.code-spell-checker"
-	]
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"charliermarsh.ruff",
+				"ms-python.flake8",
+				"bungcip.better-toml",
+				"alexcvzz.vscode-sqlite",
+				"streetsidesoftware.code-spell-checker"
+			],
+			"settings": {
+				"python.analysis.inlayHints.pytestParameters": true,
+				"python.formatting.provider": "black",
+				"python.linting.enabled": true,
+				"python.linting.lintOnSave": true,
+				"python.linting.banditEnabled": true,
+				"python.linting.flake8Enabled": true,
+				"python.linting.mypyEnabled": true,
+				"python.linting.pydocstyleEnabled": true,
+				// VS Code displays Pylint warning: import-error that not reported in Pylint by executing CLI.
+				// "python.linting.pylintEnabled": true,
+				// This setting forcibly generate __pycache__.
+				// "python.testing.pytestEnabled": true,
+				"[python]": {
+					"editor.formatOnSave": true
+				},
+				"cSpell.customDictionaries": {
+					"project-words": {
+					  "name": "project-words",
+					  "path": "${workspaceRoot}/project-words.txt",
+					  "description": "Words used in this project",
+					  "addWords": true
+				}				  
+			}
+		}
+	}
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],

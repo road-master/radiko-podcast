@@ -2,16 +2,15 @@
 import re
 from unittest import mock
 
-import pytest
 from click.testing import CliRunner
 from freezegun.api import freeze_time
-from pytest import LogCaptureFixture
+import pytest
 
 from radikopodcast import cli
 from radikopodcast.radiko_podcast import RadikoPodcast
 
 
-@pytest.mark.usefixtures("mock_all")
+@pytest.mark.usefixtures("_mock_all")
 # Decorator: freeze_time without tick=True breaks EventLoop.run_in_executor().
 # see:
 #  - Hangs in multiprocessing · Issue #230 · spulec/freezegun
@@ -22,15 +21,20 @@ def test_command_line_interface(runner_in_isolated_filesystem: CliRunner) -> Non
     with mock.patch.object(RadikoPodcast, "sleep", side_effect=KeyboardInterrupt):
         result = runner_in_isolated_filesystem.invoke(cli.radiko_podcast)
     assert result.output == ""
-    assert result.exit_code == 130
+    # CTRL + C, 128 + SIGINT
+    exit_code_ctrl_plus_c = 130
+    assert result.exit_code == exit_code_ctrl_plus_c
     help_result = runner_in_isolated_filesystem.invoke(cli.radiko_podcast, ["--help"])
     assert help_result.exit_code == 0
     assert "--help           Show this message and exit." in help_result.output
 
 
-@pytest.mark.usefixtures("database_session", "mock_requests_station")
+@pytest.mark.usefixtures("database_session", "_mock_requests_station")
 @freeze_time("2021-01-17 05:15:00", tz_offset=-9)
-def test_command_line_interface_error(runner_in_isolated_filesystem: CliRunner, caplog: LogCaptureFixture) -> None:
+def test_command_line_interface_error(
+    runner_in_isolated_filesystem: CliRunner,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     """Test CLI when error."""
     with mock.patch.object(RadikoPodcast, "sleep", side_effect=IOError):
         result = runner_in_isolated_filesystem.invoke(cli.radiko_podcast)

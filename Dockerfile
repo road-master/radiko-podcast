@@ -1,4 +1,4 @@
-FROM mstmelody/python-ffmpeg:20210822032000
+FROM mstmelody/python-ffmpeg:20230214011000
 # sqlite: To cache radiko programs locally
 RUN apt-get update && apt-get install -y \
     sqlite \

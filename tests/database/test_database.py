@@ -5,8 +5,8 @@ import pytest
 import sqlalchemy
 from sqlalchemy.engine.reflection import Inspector
 
-from radikopodcast import Session
 from radikopodcast.database.database import Database
+from radikopodcast import Session
 
 
 class TestDatabase:
