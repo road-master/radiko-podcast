@@ -46,7 +46,7 @@ radikoplaylist = "*"
 # To use YAML config file for list of programs to archive
 yamldataclassconfig = "*"
 # To manage radiko programs by database (now using SQLite)
-sqlalchemy = "*"
+sqlalchemy = "<2.0.0"
 # To generate table name by model class name
 inflector = "*"
 asynccpu = "*"

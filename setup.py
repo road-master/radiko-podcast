@@ -42,7 +42,7 @@ setup(
         "ffmpeg-python",
         "radikoplaylist",
         "yamldataclassconfig",
-        "sqlalchemy",
+        "sqlalchemy<2.0.0",
         "inflector",
         "asynccpu",
         "asyncffmpeg",
