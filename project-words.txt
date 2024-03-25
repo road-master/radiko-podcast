@@ -11,6 +11,7 @@ mypy
 nosemgrep
 Picklable
 pydocstyle
+radiko
 radikoapi
 radikoplaylist
 radikopodcast
