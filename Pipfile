@@ -27,7 +27,8 @@ dodgy = "*"
 factory-boy = "*"
 # Since Pipenv can't lock for too much combinations to attempt lock:
 # pip._vendor.resolvelib.resolvers.ResolutionTooDeep: 2000000
-flake8 = {version = "==4.0.1", markers="python_version >= '3.6'"}
+# The hacking depends flake8 ~=6.1.0 or ~=5.0.1 or ~=4.0.1.
+flake8 = {version = "!=6.0.0,!=5.0.0,>=4.0.1", markers="python_version >= '3.6'"}
 # To use flake8 --radon-show-closures
 flake8-polyfill = "*"
 # Latest hacking depends on legacy version of flake8, and legacy hacking doesn't narrow flake8 version.
