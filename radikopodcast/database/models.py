@@ -1,14 +1,15 @@
 """This module implements SQLAlchemy database models."""
+
 from __future__ import annotations
 
 from abc import abstractmethod
 
 # Reason: For type hint. pylint: disable=unused-import
 from enum import IntEnum
-from typing import TYPE_CHECKING, Generic, TypeVar, cast
+from typing import cast, Generic, TYPE_CHECKING, TypeVar
 
 from inflector import Inflector
-from sqlalchemy import DATETIME, Column, Integer, String, and_, func, or_
+from sqlalchemy import and_, Column, DATETIME, func, Integer, or_, String
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.sql.schema import ForeignKey, MetaData
@@ -19,8 +20,8 @@ from radikopodcast.radiko_datetime import RadikoDatetime
 from radikopodcast.radikoxml.xml_parser import XmlParser, XmlParserProgram, XmlParserStation
 
 if TYPE_CHECKING:
-    import datetime
     from collections.abc import Iterable
+    import datetime
 
     from sqlalchemy.orm.interfaces import MapperProperty
 
@@ -79,8 +80,7 @@ TypeVarModelInitByXml = TypeVar("TypeVarModelInitByXml", bound=ModelInitByXml)  
 class Station(ModelInitByXml[XmlParserStation]):
     """Station of radiko."""
 
-    # Reason: Design of table column.
-    id = Column(String(255), primary_key=True)  # noqa: A003
+    id = Column(String(255), primary_key=True)
     name = Column(String(255))
     list_program: Mapped[list[Program]] = relationship("Program", backref="station")
     transfer_target = Column(String(255))
@@ -101,7 +101,7 @@ class Program(ModelInitByXml[XmlParserProgram]):
     """Program of radiko."""
 
     # Reason: Model. pylint: disable=too-many-instance-attributes
-    id = Column(Integer, autoincrement=True, primary_key=True)  # noqa: A003
+    id = Column(Integer, autoincrement=True, primary_key=True)
     # The id in the radiko API is not unique...
     radiko_id = Column(String(255))
     to = Column(DATETIME)

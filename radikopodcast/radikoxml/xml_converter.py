@@ -1,4 +1,5 @@
 """XML converter."""
+
 from abc import abstractmethod
 from logging import getLogger
 from typing import Generic, Optional, TYPE_CHECKING

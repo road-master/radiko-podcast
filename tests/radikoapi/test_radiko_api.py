@@ -1,4 +1,5 @@
 """Tests for radiko_api.py."""
+
 from datetime import date
 from typing import TYPE_CHECKING
 

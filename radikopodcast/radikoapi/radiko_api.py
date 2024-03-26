@@ -1,4 +1,5 @@
-"""radiko API."""
+"""The radiko API."""
+
 from logging import getLogger
 from typing import TYPE_CHECKING
 
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
 
 
 class RadikoApi:
-    """radiko API."""
+    """The radiko API."""
 
     AREA_ID_DEFAULT = "JP13"  # TOKYO
 

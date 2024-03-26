@@ -1,4 +1,5 @@
 """To unify error check and logging process."""
+
 from http import HTTPStatus
 from logging import getLogger
 

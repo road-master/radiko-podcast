@@ -1,9 +1,10 @@
 """Tests for radiko_stream_spec_factory.py."""
+
 from dataclasses import dataclass
 from typing import Any, TYPE_CHECKING
 
 # Reason: Maybe, requires to update ffmpeg-python side.
-from ffmpeg.nodes import Stream  # type: ignore[import]
+from ffmpeg.nodes import Stream  # type: ignore[import-untyped]
 import pytest
 
 from radikopodcast.radiko_stream_spec_factory import RadikoStreamSpecFactory

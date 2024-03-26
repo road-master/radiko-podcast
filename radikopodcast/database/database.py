@@ -1,4 +1,5 @@
 """Database."""
+
 from logging import getLogger
 from typing import cast
 

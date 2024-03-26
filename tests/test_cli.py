@@ -1,4 +1,5 @@
 """Tests for cli.py."""
+
 import re
 from unittest import mock
 

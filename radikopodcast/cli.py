@@ -1,4 +1,5 @@
 """Console script for radikopodcast."""
+
 import asyncio
 from pathlib import Path
 import sys

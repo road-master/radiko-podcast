@@ -1,11 +1,12 @@
 """Configuration of pytest."""
+
 from dataclasses import dataclass, field
 from datetime import date, datetime
 import os
 from pathlib import Path
 from shutil import copyfile
 from typing import Optional, TYPE_CHECKING
-from unittest.mock import AsyncMock, MagicMock, Mock
+from unittest.mock import AsyncMock, MagicMock
 
 from asyncffmpeg.ffmpeg_coroutine_factory import FFmpegCoroutineFactory
 from click.testing import CliRunner
@@ -88,8 +89,7 @@ def xml_station_name_lacked() -> str:
 @pytest.fixture()
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
 def _mock_requests_program(requests_mock: "Mocker", xml_program: str) -> None:
-    # Reason: This is not requests but mock.
-    requests_mock.get(  # nosec: B113
+    requests_mock.get(
         "https://radiko.jp/v3/program/date/20210116/JP13.xml",
         text=xml_program,
     )
@@ -97,7 +97,7 @@ def _mock_requests_program(requests_mock: "Mocker", xml_program: str) -> None:
 
 @dataclass
 class GenreForXml:
-    id: str  # Reason: To follow specification of radiko. # noqa: A003 pylint: disable=invalid-name
+    id: str  # Reason: To follow specification of radiko. pylint: disable=invalid-name
     name: str
 
 
@@ -109,7 +109,7 @@ class ProgramForXml:
     """
 
     # Reason: Model. pylint: disable=too-many-instance-attributes
-    id: str  # Reason: To follow specification of radiko. # noqa: A003 pylint: disable=invalid-name
+    id: str  # Reason: To follow specification of radiko. pylint: disable=invalid-name
     ft: datetime  # Reason: To follow specification of radiko. pylint: disable=invalid-name
     to: datetime  # Reason: To follow specification of radiko. pylint: disable=invalid-name
     title: str
@@ -137,7 +137,7 @@ class ProgramForXml:
 
 @dataclass
 class StationForXml:
-    id: str  # Reason: To follow specification of radiko. # noqa: A003 pylint: disable=invalid-name
+    id: str  # Reason: To follow specification of radiko. pylint: disable=invalid-name
     name: str
     date: date
     list_program: list[ProgramForXml]
@@ -188,8 +188,7 @@ def _mock_requests_program_week(resource_path_root: Path, requests_mock: "Mocker
     ]
     for index, program in enumerate(list_xml_program):
         program_date = 10 + index
-        # Reason: This is not requests but mock.
-        requests_mock.get(  # nosec: B113
+        requests_mock.get(
             f"https://radiko.jp/v3/program/date/202101{program_date}/JP13.xml",
             text=program,
         )
@@ -219,28 +218,29 @@ def mock_master_playlist_client(mocker: "MockFixture") -> MagicMock:
     return mock_get  # type: ignore[no-any-return]
 
 
-class PicklableMock(Mock):
+# Reason: AsyncMock's issue.
+class PicklableAsyncMock(AsyncMock):  # pylint: disable=too-many-ancestors
     """see: https://github.com/testing-cabal/mock/issues/139#issuecomment-122128815"""
 
-    def __reduce__(self) -> tuple[type[Mock], tuple[()]]:
-        return (Mock, ())
+    def __reduce__(self) -> tuple[type[AsyncMock], tuple[()]]:
+        return (AsyncMock, ())
 
 
 @pytest.fixture()
-def mock_ffmpeg_coroutine(mocker: "MockFixture") -> "Generator[PicklableMock, None, None]":
+def mock_ffmpeg_coroutine(mocker: "MockFixture") -> "Generator[PicklableAsyncMock, None, None]":
     """Mock FFmpegCoroutine."""
-    mock = PicklableMock()
+    mock = PicklableAsyncMock()
     # Reason: To init original mock. pylint: disable=attribute-defined-outside-init
-    mock.execute = AsyncMock()
-    mocker.patch.object(FFmpegCoroutineFactory, "create", mock)
+    mock.execute = PicklableAsyncMock()
+    mock_create = mocker.MagicMock(return_value=mock)
+    mocker.patch.object(FFmpegCoroutineFactory, "create", mock_create)
     return mock
 
 
 @pytest.fixture()
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
 def _mock_requests_station(requests_mock: "Mocker", xml_station: str) -> None:
-    # Reason: This is not requests but mock.
-    requests_mock.get(  # nosec: B113
+    requests_mock.get(
         "https://radiko.jp/v3/station/list/JP13.xml",
         text=xml_station,
     )
@@ -307,6 +307,6 @@ def _mock_all(
     _mock_requests_station: None,
     _mock_requests_program_week: None,
     mock_master_playlist_client: MagicMock,  # noqa: ARG001
-    mock_ffmpeg_coroutine: PicklableMock,  # noqa: ARG001
+    mock_ffmpeg_coroutine: PicklableAsyncMock,  # noqa: ARG001
 ) -> None:
     """Set of mocks for E2E test."""

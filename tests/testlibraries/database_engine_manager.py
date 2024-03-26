@@ -1,4 +1,5 @@
 """This module implements database engine manager for unit testing."""
+
 from contextlib import AbstractContextManager
 from typing import Optional, TYPE_CHECKING
 
@@ -31,7 +32,8 @@ class DatabaseEngineManager(AbstractContextManager[Engine]):
         exc_type: Optional[type[BaseException]],
         exc_value: Optional[BaseException],
         # This comment prevents Pylint duplicate-code.
-        traceback: Optional["TracebackType"],
+        # Reason: Ruff's bug.
+        traceback: Optional["TracebackType"],  # noqa: PYI036
     ) -> None:
         # Remove it, so that the next test gets a new Session()
         self.scoped_session.close()

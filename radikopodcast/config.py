@@ -1,4 +1,5 @@
 """Configuration."""
+
 from dataclasses import dataclass, field
 
 from yamldataclassconfig.config import YamlDataClassConfig
