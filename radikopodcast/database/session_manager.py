@@ -1,4 +1,5 @@
 """This module implements SQLAlchemy session life cycle to prevent forgetting close."""
+
 from contextlib import AbstractContextManager
 from types import TracebackType
 from typing import Optional

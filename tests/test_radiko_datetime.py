@@ -1,5 +1,7 @@
 """Test for RadikoDateTime."""
+
 from datetime import date, datetime
+from typing import ClassVar
 
 from freezegun.api import freeze_time
 import pytest
@@ -10,17 +12,17 @@ from radikopodcast.radiko_datetime import JST, RadikoDate, RadikoDatetime
 class TestRadikoDatetime:
     """Test for RadikoDatetime."""
 
-    CASE_TIME_FREE_OLDEST_DAY = [
+    CASE_TIME_FREE_OLDEST_DAY: ClassVar = [
         (datetime(2021, 1, 7, 21, 55, 15, tzinfo=JST), date(2020, 12, 31)),
         (datetime(2021, 1, 8, 4, 59, 59, tzinfo=JST), date(2020, 12, 31)),
         (datetime(2021, 1, 8, 5, 0, 0, tzinfo=JST), date(2021, 1, 1)),
     ]
-    CASE_TIME_FREE_DAY_BEFORE_NEWEST_DAY = [
+    CASE_TIME_FREE_DAY_BEFORE_NEWEST_DAY: ClassVar = [
         (datetime(2021, 1, 7, 21, 55, 15, tzinfo=JST), date(2021, 1, 6)),
         (datetime(2021, 1, 8, 4, 59, 59, tzinfo=JST), date(2021, 1, 6)),
         (datetime(2021, 1, 8, 5, 0, 0, tzinfo=JST), date(2021, 1, 7)),
     ]
-    CASE_IS_SAME_RADIKO_DATE = [
+    CASE_IS_SAME_RADIKO_DATE: ClassVar = [
         (datetime(2021, 11, 21, 4, 59, 59, tzinfo=JST), datetime(2021, 11, 20, 5, 0, 0, tzinfo=JST), True),
         (datetime(2021, 11, 21, 4, 59, 59, tzinfo=JST), datetime(2021, 11, 21, 5, 0, 0, tzinfo=JST), False),
         (datetime(2021, 11, 20, 5, 0, 0, tzinfo=JST), datetime(2021, 11, 21, 4, 59, 59, tzinfo=JST), True),

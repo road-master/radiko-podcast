@@ -1,4 +1,5 @@
 """Tests for database.py."""
+
 from typing import cast
 
 import pytest

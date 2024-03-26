@@ -1,4 +1,5 @@
 """XML parsers."""
+
 from typing import Any, Callable, TYPE_CHECKING
 
 from defusedxml import ElementTree
@@ -58,7 +59,7 @@ class XmlParserProgram(XmlParser):
 
     @property
     # Reason: "id" meets requirement of snake_case. pylint: disable=invalid-name
-    def id(self) -> str:  # noqa: A003
+    def id(self) -> str:
         return self.element_tree_program.attrib["id"]
 
     @property
@@ -110,7 +111,7 @@ class XmlParserStation(XmlParser):
 
     @property
     # Reason: "id" meets requirement of snake_case. pylint: disable=invalid-name
-    def id(self) -> str:  # noqa: A003
+    def id(self) -> str:
         """ID if find it, otherwise, raises error."""
         element_id = self.element_tree_station.find("./id")
         if element_id is None:

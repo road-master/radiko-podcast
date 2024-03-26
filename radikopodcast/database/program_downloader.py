@@ -1,4 +1,5 @@
 """Download programs."""
+
 from collections.abc import Generator
 from datetime import date, datetime, timedelta
 from logging import getLogger

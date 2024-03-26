@@ -1,4 +1,5 @@
 """Test for models.py."""
+
 from datetime import date
 from typing import cast
 
@@ -22,7 +23,7 @@ class TestProgram:
         model_program.to = None
         with pytest.raises(ValueError, match="None") as excinfo:
             # Reason: Property has logic. pylint: disable=pointless-statement
-            model_program.to_string
+            model_program.to_string  # noqa: B018
         assert "None" in str(excinfo.value)
 
     @staticmethod
@@ -30,7 +31,7 @@ class TestProgram:
         model_program.ft = None
         with pytest.raises(ValueError, match="None") as excinfo:
             # Reason: Property has logic. pylint: disable=pointless-statement
-            model_program.ft_string
+            model_program.ft_string  # noqa: B018
         assert "None" in str(excinfo.value)
 
     @pytest.mark.usefixtures("record_program")

@@ -1,4 +1,5 @@
 """Datetime for radiko specification."""
+
 from datetime import date, datetime, timedelta, timezone
 
 JST = timezone(timedelta(hours=+9), "JST")

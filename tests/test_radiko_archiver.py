@@ -1,4 +1,5 @@
 """Test for radiko_archiver.py."""
+
 import asyncio
 import sys
 from unittest.mock import AsyncMock

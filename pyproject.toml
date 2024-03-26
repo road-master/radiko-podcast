@@ -167,6 +167,9 @@ ignored-classes = [
 
 [tool.ruff]
 line-length = 119
+target-version = "py39"
+
+[tool.ruff.lint]
 select = [
     "F",  # Pyflakes
     "E",  # pycodestyle
@@ -221,4 +224,3 @@ ignore = [
     "ANN102",  # Missing type annotation for `cls` in classmethod
     "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed, These warnings are disabled by default
 ]
-target-version = "py39"

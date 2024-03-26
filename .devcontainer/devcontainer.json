@@ -23,28 +23,43 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"GitHub.copilot",
 				"ms-python.python",
-				"charliermarsh.ruff",
 				"ms-python.flake8",
+				"ms-python.isort",
+				"ms-python.mypy-type-checker",
+				"ms-python.pylint",
+				"charliermarsh.ruff",
+				"wk-j.save-and-run",
 				"bungcip.better-toml",
-				"alexcvzz.vscode-sqlite",
 				"streetsidesoftware.code-spell-checker"
 			],
 			"settings": {
+				// Whether to display inlay hints for pytest fixture argument types.
+				// - Settings Reference for Python
+				//   https://code.visualstudio.com/docs/python/settings-reference
 				"python.analysis.inlayHints.pytestParameters": true,
 				"python.formatting.provider": "black",
-				"python.linting.enabled": true,
-				"python.linting.lintOnSave": true,
-				"python.linting.banditEnabled": true,
-				"python.linting.flake8Enabled": true,
-				"python.linting.mypyEnabled": true,
-				"python.linting.pydocstyleEnabled": true,
-				// VS Code displays Pylint warning: import-error that not reported in Pylint by executing CLI.
-				// "python.linting.pylintEnabled": true,
 				// This setting forcibly generate __pycache__.
 				// "python.testing.pytestEnabled": true,
 				"[python]": {
-					"editor.formatOnSave": true
+					"editor.formatOnSave": true,
+					"editor.codeActionsOnSave": {
+						"source.fixAll": true,
+						"source.organizeImports": true
+					}
+				},
+				"emeraldwalk.runonsave": {
+					"commands": [
+						{
+							"match": ".*\\.py",
+							"cmd": "pipenv run autoflake --in-place ${file}"
+						},
+						{
+							"match": ".*\\.py",
+							"cmd": "pipenv run docformatter --in-place ${file}"
+						}
+					]
 				},
 				"cSpell.customDictionaries": {
 					"project-words": {

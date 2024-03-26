@@ -1,4 +1,5 @@
 """Tests for requester.py."""
+
 import pytest
 from radikoplaylist.exceptions import BadHttpStatusCodeError, HttpRequestTimeoutError
 from requests import Timeout
@@ -14,15 +15,13 @@ class TestRequester:
     @staticmethod
     def test_http_request_timeout_error(requests_mock: Mocker) -> None:
         """Get request with error check and logging process."""
-        # Reason: This is not requests but mock.
-        requests_mock.get(requests_mock_module.ANY, exc=Timeout)  # nosec: B113
+        requests_mock.get(requests_mock_module.ANY, exc=Timeout)
         with pytest.raises(HttpRequestTimeoutError):
             Requester.get("https://example.com")
 
     @staticmethod
     def test_bad_http_status_code_error(requests_mock: Mocker) -> None:
         """Get request with error check and logging process."""
-        # Reason: This is not requests but mock.
-        requests_mock.get(requests_mock_module.ANY, status_code=400)  # nosec: B113
+        requests_mock.get(requests_mock_module.ANY, status_code=400)
         with pytest.raises(BadHttpStatusCodeError):
             Requester.get("https://example.com")

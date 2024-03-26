@@ -1,4 +1,5 @@
 """Tests for xml_parser.py."""
+
 from defusedxml import ElementTree
 import pytest
 
@@ -21,7 +22,7 @@ class TestXmlParserStation:
         parser = XmlParserProgram(element_tree, None, None, "JP13")  # type: ignore[arg-type]
         with pytest.raises(XmlParseError) as excinfo:
             # Reason: Property has logic. pylint: disable=pointless-statement
-            parser.title
+            parser.title  # noqa: B018
         assert expect in str(excinfo.value)
 
     @staticmethod
@@ -34,7 +35,7 @@ class TestXmlParserStation:
         xml_parser_program = XmlParserStation(ElementTree.fromstring(xml, forbid_dtd=True))
         with pytest.raises(XmlParseError) as excinfo:
             # Reason: Property has logic. pylint: disable=pointless-statement
-            xml_parser_program.id
+            xml_parser_program.id  # noqa: B018
         assert expect in str(excinfo.value)
 
     @staticmethod
@@ -47,5 +48,5 @@ class TestXmlParserStation:
         xml_parser_program = XmlParserStation(ElementTree.fromstring(xml, forbid_dtd=True))
         with pytest.raises(XmlParseError) as excinfo:
             # Reason: Property has logic. pylint: disable=pointless-statement
-            xml_parser_program.name
+            xml_parser_program.name  # noqa: B018
         assert expect in str(excinfo.value)

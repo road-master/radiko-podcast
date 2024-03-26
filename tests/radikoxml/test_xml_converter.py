@@ -1,4 +1,5 @@
 """Tests for xmp_converter.py."""
+
 from datetime import date, datetime
 from typing import TYPE_CHECKING
 
@@ -31,7 +32,7 @@ class TestXmlConverter:
 
     @staticmethod
     def check_program1(program: "Program") -> None:
-        assert program.id == "9552146705"
+        assert program.radiko_id == "9552146705"
         assert program.ft == datetime(2021, 1, 16, 5, 0, tzinfo=JST)
         assert program.to == datetime(2021, 1, 16, 6, 0, tzinfo=JST)
 

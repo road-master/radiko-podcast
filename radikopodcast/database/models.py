@@ -1,4 +1,5 @@
 """This module implements SQLAlchemy database models."""
+
 from __future__ import annotations
 
 from abc import abstractmethod
@@ -8,7 +9,7 @@ from enum import IntEnum
 from typing import cast, Generic, TYPE_CHECKING, TypeVar
 
 from inflector import Inflector
-from sqlalchemy import and_, Column, DATETIME, func, or_, String
+from sqlalchemy import and_, Column, DATETIME, func, Integer, or_, String
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.sql.schema import ForeignKey, MetaData
@@ -79,8 +80,7 @@ TypeVarModelInitByXml = TypeVar("TypeVarModelInitByXml", bound=ModelInitByXml)  
 class Station(ModelInitByXml[XmlParserStation]):
     """Station of radiko."""
 
-    # Reason: Design of table column.
-    id = Column(String(255), primary_key=True)  # noqa: A003
+    id = Column(String(255), primary_key=True)
     name = Column(String(255))
     list_program: Mapped[list[Program]] = relationship("Program", backref="station")
     transfer_target = Column(String(255))
@@ -101,7 +101,9 @@ class Program(ModelInitByXml[XmlParserProgram]):
     """Program of radiko."""
 
     # Reason: Model. pylint: disable=too-many-instance-attributes
-    id = Column(String(255), primary_key=True)  # noqa: A003
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    # The id in the radiko API is not unique...
+    radiko_id = Column(String(255))
     to = Column(DATETIME)
     ft = Column(DATETIME)
     title = Column(String(255))
@@ -112,7 +114,7 @@ class Program(ModelInitByXml[XmlParserProgram]):
 
     def init(self, xml_parser: XmlParserProgram) -> None:
         # Reason: "id" meets requirement of snake_case. pylint: disable=invalid-name
-        self.id = xml_parser.id
+        self.radiko_id = xml_parser.id
         # Reason: Can't understand what "ft" points. pylint: disable=invalid-name
         self.ft = xml_parser.ft
         # Reason: "to" meets requirement of snake_case. pylint: disable=invalid-name
