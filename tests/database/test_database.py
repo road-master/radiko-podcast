@@ -1,10 +1,7 @@
 """Tests for database.py."""
 
-from typing import cast
-
 import pytest
 import sqlalchemy
-from sqlalchemy.engine.reflection import Inspector
 
 from radikopodcast.database.database import Database
 from radikopodcast import Session
@@ -19,6 +16,6 @@ class TestDatabase:
         """Database should create tables."""
         Database()
         engine = Session.get_bind()
-        inspector = cast(Inspector, sqlalchemy.inspect(engine))
+        inspector = sqlalchemy.inspect(engine)
         assert inspector.has_table("stations")
         assert inspector.has_table("programs")

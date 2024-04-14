@@ -50,7 +50,7 @@ dependencies = [
     "ffmpeg-python",
     "radikoplaylist",
     "yamldataclassconfig",
-    "sqlalchemy<2.0.0",
+    "sqlalchemy",
     "inflector",
     "asynccpu",
     "asyncffmpeg",
@@ -74,6 +74,9 @@ zip-safe = false
 
 [tool.setuptools.packages.find]
 include = ["radikopodcast", "radikopodcast.*"]
+
+[tool.bandit.assert_used]
+skips = ["tests/*"]
 
 # @see https://black.readthedocs.io/en/stable/pyproject_toml.html#configuration-format
 [tool.black]
@@ -121,7 +124,7 @@ order_by_type = false
 [tool.mypy]
 strict = true
 plugins = [
-    "sqlalchemy.ext.mypy.plugin"
+  "sqlalchemy.ext.mypy.plugin"
 ]
 
 [[tool.mypy.overrides]]
@@ -225,3 +228,6 @@ ignore = [
     "ANN102",  # Missing type annotation for `cls` in classmethod
     "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed, These warnings are disabled by default
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
