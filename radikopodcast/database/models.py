@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-
-# Reason: For type hint. pylint: disable=unused-import
 from enum import IntEnum
 from typing import cast, Generic, TYPE_CHECKING, TypeVar
 
@@ -51,8 +49,6 @@ class ModelInitByXml(Base, Generic[TypeVarXmlParser]):
     # see: https://docs.sqlalchemy.org/en/14/orm/mapping_api.html#class-mapping-api
     # pylint: disable=no-self-argument
     def __tablename__(cls) -> MapperProperty[str]:  # noqa: N805
-        # Reason: "cls" is not instance.
-        # pylint: disable=no-member
         return Inflector().pluralize(cls.__name__.lower())
 
     def __init__(self, xml_parser: TypeVarXmlParser) -> None:
@@ -92,8 +88,12 @@ class Station(ModelInitByXml[XmlParserStation]):
 
     @staticmethod
     def is_empty() -> bool:
+        """Returns whether the station table is empty."""
         with SessionManager() as session:
-            count = cast(tuple[int], session.query(func.count(Station.id)).one())
+            # Reason: Pylint's bug:
+            # - `not-callable` false positive for class · Issue #8138 · pylint-dev/pylint
+            #   https://github.com/pylint-dev/pylint/issues/8138
+            count = cast(tuple[int], session.query(func.count(Station.id)).one())  # pylint: disable=not-callable
             return count == (0,)
 
 
@@ -145,7 +145,7 @@ class Program(ModelInitByXml[XmlParserProgram]):
         with SessionManager() as session:
             selected_program = session.query(Program).with_for_update().filter_by(id=program.id).one()
             selected_program.archive_status = archive_id.value
-            session.flush()
+            session.commit()
 
     @property
     def ft_string(self) -> str:
@@ -164,7 +164,7 @@ class Program(ModelInitByXml[XmlParserProgram]):
     @staticmethod
     def is_empty(target_date: datetime.date) -> bool:
         with SessionManager() as session:
-            count = cast(tuple[int], session.query(func.count(Program.id)).filter(Program.date == target_date).one())
+            count = cast(tuple[int], session.query(func.count(Program.id)).filter(Program.date == target_date).one())  # pylint: disable=not-callable
             return count == (0,)
 
     @staticmethod

@@ -49,6 +49,7 @@
 						"source.organizeImports": true
 					}
 				},
+				"ruff.organizeImports": false,
 				"emeraldwalk.runonsave": {
 					"commands": [
 						{

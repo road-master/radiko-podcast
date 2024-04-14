@@ -1,9 +1,7 @@
 """Database."""
 
 from logging import getLogger
-from typing import cast
 
-from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy import inspect
 
 from radikopodcast.database.models import Base
@@ -16,7 +14,7 @@ class Database:
     def __init__(self) -> None:
         self.logger = getLogger(__name__)
         engine = Session.get_bind()
-        inspector = cast(Inspector, inspect(engine))
+        inspector = inspect(engine)
         if not inspector.has_table("programs"):
             self.initialize_database()
 
