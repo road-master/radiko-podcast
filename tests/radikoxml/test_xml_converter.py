@@ -1,12 +1,14 @@
 """Tests for xmp_converter.py."""
 
-from datetime import date, datetime
+from datetime import date
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from defusedxml import ElementTree
 
 from radikopodcast.radiko_datetime import JST
-from radikopodcast.radikoxml.xml_converter import XmlConverterProgram, XmlConverterStation
+from radikopodcast.radikoxml.xml_converter import XmlConverterProgram
+from radikopodcast.radikoxml.xml_converter import XmlConverterStation
 
 if TYPE_CHECKING:
     # Reason: The defusedxml's issue:
@@ -14,7 +16,8 @@ if TYPE_CHECKING:
     #   https://github.com/tiran/defusedxml/issues/48
     from xml.etree.ElementTree import Element  # nosec B405
 
-    from radikopodcast.database.models import Program, Station
+    from radikopodcast.database.models import Program
+    from radikopodcast.database.models import Station
 
 
 class TestXmlConverter:

@@ -1,18 +1,23 @@
 """Configuration of pytest."""
 
-from dataclasses import dataclass, field
-from datetime import date, datetime
+from __future__ import annotations
+
 import os
+from dataclasses import dataclass
+from dataclasses import field
+from datetime import date
+from datetime import datetime
 from pathlib import Path
 from shutil import copyfile
-from typing import Optional, TYPE_CHECKING
-from unittest.mock import AsyncMock, MagicMock
+from typing import TYPE_CHECKING
+from unittest.mock import AsyncMock
+from unittest.mock import MagicMock
 
+import pytest
 from asyncffmpeg.ffmpeg_coroutine_factory import FFmpegCoroutineFactory
 from click.testing import CliRunner
 from defusedxml import ElementTree
 from jinja2 import Template
-import pytest
 from radikoplaylist.master_playlist_client import MasterPlaylistClient
 
 from radikopodcast.database.models import Program
@@ -37,18 +42,18 @@ if TYPE_CHECKING:
 collect_ignore = ["setup.py"]
 
 
-@pytest.fixture()
+@pytest.fixture
 def config_yaml(resource_path_root: Path) -> Path:
     return resource_path_root / "config.yml"
 
 
-@pytest.fixture()
+@pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
 def execution_environment(
     tmp_path: Path,
     config_yaml: Path,
-    request: "FixtureRequest",
-) -> "Generator[Path, None, None]":
+    request: FixtureRequest,
+) -> Generator[Path, None, None]:
     """Move to temporary directory with ./config.yml and ./output/ directory."""
     copyfile(config_yaml, tmp_path / "config.yml")
     (tmp_path / "output").mkdir()
@@ -57,9 +62,9 @@ def execution_environment(
     os.chdir(request.config.invocation_params.dir)
 
 
-@pytest.fixture()
+@pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
-def runner_in_isolated_filesystem(tmp_path: Path, config_yaml: Path) -> "Generator[CliRunner, None, None]":
+def runner_in_isolated_filesystem(tmp_path: Path, config_yaml: Path) -> Generator[CliRunner, None, None]:
     """CLI runner in isolated filesystem with ./config.yml and ./output/ directory."""
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path) as isolated_filesystem:
@@ -68,17 +73,17 @@ def runner_in_isolated_filesystem(tmp_path: Path, config_yaml: Path) -> "Generat
         yield runner
 
 
-@pytest.fixture()
+@pytest.fixture
 def xml_program(resource_path_root: Path) -> str:
     return (resource_path_root / "program.xml").read_text(encoding="utf-8")
 
 
-@pytest.fixture()
+@pytest.fixture
 def xml_station(resource_path_root: Path) -> str:
     return (resource_path_root / "station.xml").read_text(encoding="utf-8")
 
 
-@pytest.fixture()
+@pytest.fixture
 def xml_station_name_lacked() -> str:
     return """\
 <stations area_id="JP13" area_name="TOKYO JAPAN">
@@ -86,9 +91,9 @@ def xml_station_name_lacked() -> str:
 </stations>"""
 
 
-@pytest.fixture()
+@pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
-def _mock_requests_program(requests_mock: "Mocker", xml_program: str) -> None:
+def _mock_requests_program(requests_mock: Mocker, xml_program: str) -> None:
     requests_mock.get(
         "https://radiko.jp/v3/program/date/20210116/JP13.xml",
         text=xml_program,
@@ -119,8 +124,8 @@ class ProgramForXml:
     performer: str = ""
     image: str = ""
     tags: list[str] = field(default_factory=list)
-    genre_personality: Optional[GenreForXml] = None
-    genre_program: Optional[GenreForXml] = None
+    genre_personality: GenreForXml | None = None
+    genre_program: GenreForXml | None = None
 
     @property
     def ftl(self) -> str:
@@ -172,9 +177,9 @@ def create_list_station(index: int) -> list[StationForXml]:
     ]
 
 
-@pytest.fixture()
+@pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
-def _mock_requests_program_week(resource_path_root: Path, requests_mock: "Mocker", xml_program: str) -> None:
+def _mock_requests_program_week(resource_path_root: Path, requests_mock: Mocker, xml_program: str) -> None:
     """Mock radiko API for getting program list for 1 week."""
     template = Template((resource_path_root / "program.xml.jinja").read_text(encoding="utf-8"))
     list_xml_program = [
@@ -194,8 +199,8 @@ def _mock_requests_program_week(resource_path_root: Path, requests_mock: "Mocker
         )
 
 
-@pytest.fixture()
-def mock_master_playlist_client(mocker: "MockFixture") -> MagicMock:
+@pytest.fixture
+def mock_master_playlist_client(mocker: MockFixture) -> MagicMock:
     """Mock MasterPlaylistClient.get()."""
     master_playlist = MasterPlaylist(
         "",
@@ -226,8 +231,8 @@ class PicklableAsyncMock(AsyncMock):  # pylint: disable=too-many-ancestors
         return (AsyncMock, ())
 
 
-@pytest.fixture()
-def mock_ffmpeg_coroutine(mocker: "MockFixture") -> "Generator[PicklableAsyncMock, None, None]":
+@pytest.fixture
+def mock_ffmpeg_coroutine(mocker: MockFixture) -> Generator[PicklableAsyncMock, None, None]:
     """Mock FFmpegCoroutine."""
     mock = PicklableAsyncMock()
     # Reason: To init original mock. pylint: disable=attribute-defined-outside-init
@@ -237,76 +242,76 @@ def mock_ffmpeg_coroutine(mocker: "MockFixture") -> "Generator[PicklableAsyncMoc
     return mock
 
 
-@pytest.fixture()
+@pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
-def _mock_requests_station(requests_mock: "Mocker", xml_station: str) -> None:
+def _mock_requests_station(requests_mock: Mocker, xml_station: str) -> None:
     requests_mock.get(
         "https://radiko.jp/v3/station/list/JP13.xml",
         text=xml_station,
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
-def element_tree_program(xml_program: str) -> "Element":
+def element_tree_program(xml_program: str) -> Element:
     # Reason: The defusedxml's responsible.
     return ElementTree.fromstring(xml_program, forbid_dtd=True)  # type: ignore[no-any-return]
 
 
-@pytest.fixture()
+@pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
-def element_tree_station(xml_station: str) -> "Element":
+def element_tree_station(xml_station: str) -> Element:
     # Reason: The defusedxml's responsible.
     return ElementTree.fromstring(xml_station, forbid_dtd=True)  # type: ignore[no-any-return]
 
 
-@pytest.fixture()
+@pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
-def model_program(element_tree_program: "Element") -> Program:
+def model_program(element_tree_program: Element) -> Program:
     return XmlConverterProgram(date(2021, 1, 16), element_tree_program, "JP13").to_model()[0]
 
 
-@pytest.fixture()
+@pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
-def model_program_area_id_none(element_tree_program: "Element") -> Program:
+def model_program_area_id_none(element_tree_program: Element) -> Program:
     # Reason: To create invalid instance.
     return XmlConverterProgram(date(2021, 1, 16), element_tree_program, None).to_model()[0]  # type: ignore[arg-type]
 
 
-@pytest.fixture()
-def database_session() -> "Generator[SQLAlchemySession, None, None]":
+@pytest.fixture
+def database_session() -> Generator[SQLAlchemySession, None, None]:
     """This fixture prepares database and fixture records."""
     yield from DatabaseForTest.database_session()
 
 
-@pytest.fixture()
-def database_session_with_schema() -> "Generator[SQLAlchemySession, None, None]":
+@pytest.fixture
+def database_session_with_schema() -> Generator[SQLAlchemySession, None, None]:
     """This fixture prepares database session and fixture records to reset database after each test."""
     yield from DatabaseForTest.database_session_with_schema()
 
 
-@pytest.fixture()
+@pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
 def record_program(
-    database_session_with_schema: "SQLAlchemySession",
-    element_tree_program: "Element",
-) -> "SQLAlchemySession":
+    database_session_with_schema: SQLAlchemySession,
+    element_tree_program: Element,
+) -> SQLAlchemySession:
     """This fixture prepares database session and fixture records to reset database after each test."""
     Program.save_all(XmlConverterProgram(date(2021, 1, 16), element_tree_program, "JP13").to_model())
     database_session_with_schema.flush()
     return database_session_with_schema
 
 
-@pytest.fixture()
+@pytest.fixture
 # Reason: To refer other fixture. pylint: disable=unused-argument,redefined-outer-name
 def _mock_all(
     # Reason: Fixture can't use mark.usefixtures():
     # - How to use fixtures — pytest documentation
     #   https://docs.pytest.org/en/latest/how-to/fixtures.html#use-fixtures-in-classes-and-modules-with-usefixtures
-    database_session: "SQLAlchemySession",  # noqa: ARG001
+    database_session: SQLAlchemySession,
     _mock_requests_station: None,
     _mock_requests_program_week: None,
-    mock_master_playlist_client: MagicMock,  # noqa: ARG001
-    mock_ffmpeg_coroutine: PicklableAsyncMock,  # noqa: ARG001
+    mock_master_playlist_client: MagicMock,
+    mock_ffmpeg_coroutine: PicklableAsyncMock,
 ) -> None:
     """Set of mocks for E2E test."""

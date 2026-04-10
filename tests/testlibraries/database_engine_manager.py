@@ -1,7 +1,9 @@
 """This module implements database engine manager for unit testing."""
 
+from __future__ import annotations
+
 from contextlib import AbstractContextManager
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import sqlalchemy
 from sqlalchemy.engine.base import Engine
@@ -20,7 +22,7 @@ class DatabaseEngineManager(AbstractContextManager[Engine]):
     in the development / production database and inject new engine on every unit testing to run parallel.
     """
 
-    def __init__(self, argument_scoped_session: "scoped_session[Session]") -> None:
+    def __init__(self, argument_scoped_session: scoped_session[Session]) -> None:
         self.scoped_session = argument_scoped_session
         self.engine = sqlalchemy.create_engine("sqlite://")
 
@@ -30,11 +32,11 @@ class DatabaseEngineManager(AbstractContextManager[Engine]):
 
     def __exit__(
         self,
-        exc_type: Optional[type[BaseException]],
-        exc_value: Optional[BaseException],
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
         # This comment prevents Pylint duplicate-code.
         # Reason: Ruff's bug.
-        traceback: Optional["TracebackType"],  # noqa: PYI036
+        traceback: TracebackType | None,
     ) -> None:
         # Remove it, so that the next test gets a new Session()
         self.scoped_session.close()

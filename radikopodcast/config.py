@@ -1,6 +1,7 @@
 """Configuration."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field
 
 from yamldataclassconfig.config import YamlDataClassConfig
 

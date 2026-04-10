@@ -1,7 +1,9 @@
 """Download programs."""
 
 from collections.abc import Generator
-from datetime import date, datetime, timedelta
+from datetime import date
+from datetime import datetime
+from datetime import timedelta
 from logging import getLogger
 
 from radikopodcast.database.models import Program

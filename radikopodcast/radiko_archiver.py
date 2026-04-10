@@ -1,8 +1,8 @@
 """Radiko Archiver."""
 
 import asyncio
-from logging import getLogger
 import os
+from logging import getLogger
 
 # Reason: Following export method in __init__.py from Effective Python 2nd Edition item 85
 from asyncffmpeg import FFmpegCoroutineFactory

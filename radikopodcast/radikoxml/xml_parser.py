@@ -1,6 +1,10 @@
 """XML parsers."""
 
-from typing import Any, Callable, TYPE_CHECKING
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+from typing import Callable
+from typing import TypeVar
 
 from defusedxml import ElementTree
 from errorcollector import MultipleErrorCollector
@@ -9,13 +13,17 @@ from radikopodcast.exceptions import XmlParseError
 from radikopodcast.radiko_datetime import RadikoDatetime
 
 if TYPE_CHECKING:
-    from datetime import date, datetime
+    from datetime import date
+    from datetime import datetime
 
     # Reason: The defusedxml's issue:
     # - defusedxml lacks an Element class · Issue #48 · tiran/defusedxml
     #   https://github.com/tiran/defusedxml/issues/48
     # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # noqa: ERA001
     from xml.etree.ElementTree import Element  # nosec B405
+
+
+T = TypeVar("T")
 
 
 class XmlParser:
@@ -29,13 +37,14 @@ class XmlParser:
         """This method validates data."""
         return bool(self.list_error)
 
-    def stock_error(self, method: Callable[[], Any], message: str) -> Any:
+    def stock_error(self, method: Callable[[], T], message: str) -> T | None:
         """This method stocks error."""
         with MultipleErrorCollector(XmlParseError, message, self.list_error):
             return method()
+        return None
 
     @staticmethod
-    def to_string(element: "Element") -> str:
+    def to_string(element: Element) -> str:
         # Reason: The defusedxml's responsible.
         return ElementTree.tostring(element, encoding="unicode")  # type: ignore[no-any-return]
 
@@ -46,9 +55,9 @@ class XmlParserProgram(XmlParser):
 
     def __init__(
         self,
-        element_tree_program: "Element",
-        element_tree_station: "Element",
-        target_date: "date",
+        element_tree_program: Element,
+        element_tree_station: Element,
+        target_date: date,
         area_id: str,
     ) -> None:
         super().__init__()
@@ -64,12 +73,12 @@ class XmlParserProgram(XmlParser):
 
     @property
     # Reason: Can't understand what "ft" points. pylint: disable=invalid-name
-    def ft(self) -> "datetime":
+    def ft(self) -> datetime:
         return RadikoDatetime.decode(self.element_tree_program.attrib["ft"])
 
     @property
     # Reason: "to" meets requirement of snake_case. pylint: disable=invalid-name
-    def to(self) -> "datetime":
+    def to(self) -> datetime:
         return RadikoDatetime.decode(self.element_tree_program.attrib["to"])
 
     @property
@@ -105,7 +114,7 @@ class XmlParserProgram(XmlParser):
 class XmlParserStation(XmlParser):
     """XML parser for station of radiko."""
 
-    def __init__(self, element_tree_station: "Element") -> None:
+    def __init__(self, element_tree_station: Element) -> None:
         super().__init__()
         self.element_tree_station = element_tree_station
 

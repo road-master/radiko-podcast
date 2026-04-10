@@ -2,26 +2,39 @@
 
 from __future__ import annotations
 
+import datetime  # noqa: TC003
 from abc import abstractmethod
 from enum import IntEnum
-from typing import cast, Generic, TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING
+from typing import Generic
+from typing import TypeVar
+from typing import cast
 
 from inflector import Inflector
-from sqlalchemy import and_, Column, DATETIME, func, Integer, or_, String
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.orm import Mapped, relationship
-from sqlalchemy.sql.schema import ForeignKey, MetaData
-from sqlalchemy.sql.sqltypes import DATE, INTEGER
+from sqlalchemy import DATETIME
+from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy import and_
+from sqlalchemy import func
+from sqlalchemy import or_
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import declared_attr
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql.schema import ForeignKey
+from sqlalchemy.sql.schema import MetaData
+from sqlalchemy.sql.sqltypes import DATE
+from sqlalchemy.sql.sqltypes import INTEGER
 
 from radikopodcast.database.session_manager import SessionManager
 from radikopodcast.radiko_datetime import RadikoDatetime
-from radikopodcast.radikoxml.xml_parser import XmlParser, XmlParserProgram, XmlParserStation
+from radikopodcast.radikoxml.xml_parser import XmlParser
+from radikopodcast.radikoxml.xml_parser import XmlParserProgram
+from radikopodcast.radikoxml.xml_parser import XmlParserStation
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-    import datetime
-
-    from sqlalchemy.orm.interfaces import MapperProperty
 
 
 class ArchiveStatusId(IntEnum):
@@ -34,7 +47,11 @@ class ArchiveStatusId(IntEnum):
     ARCHIVED = 4
 
 
-Base = declarative_base(metadata=MetaData())
+class Base(DeclarativeBase):
+    """Declarative base class."""
+
+    metadata = MetaData()
+
 
 TypeVarXmlParser = TypeVar("TypeVarXmlParser", bound=XmlParser)
 
@@ -44,12 +61,12 @@ class ModelInitByXml(Base, Generic[TypeVarXmlParser]):
 
     __abstract__ = True
 
-    @declared_attr
+    @declared_attr.directive
     # Reason: @declared_attr marks method as class level.
-    # see: https://docs.sqlalchemy.org/en/14/orm/mapping_api.html#class-mapping-api
+    # see: https://docs.sqlalchemy.org/en/20/orm/declarative_mixins.html
     # pylint: disable=no-self-argument
-    def __tablename__(cls) -> MapperProperty[str]:  # noqa: N805
-        return Inflector().pluralize(cls.__name__.lower())
+    def __tablename__(cls) -> str:  # noqa: N805
+        return str(Inflector().pluralize(cls.__name__.lower()))
 
     def __init__(self, xml_parser: TypeVarXmlParser) -> None:
         super().__init__()
@@ -76,10 +93,10 @@ TypeVarModelInitByXml = TypeVar("TypeVarModelInitByXml", bound=ModelInitByXml)  
 class Station(ModelInitByXml[XmlParserStation]):
     """Station of radiko."""
 
-    id = Column(String(255), primary_key=True)
-    name = Column(String(255))
+    id: Mapped[str] = mapped_column(String(255), primary_key=True)
+    name: Mapped[str | None] = mapped_column(String(255))
     list_program: Mapped[list[Program]] = relationship("Program", backref="station")
-    transfer_target = Column(String(255))
+    transfer_target: Mapped[str | None] = mapped_column(String(255))
 
     def init(self, xml_parser: XmlParserStation) -> None:
         # Reason: "id" meets requirement of snake_case. pylint: disable=invalid-name
@@ -93,7 +110,7 @@ class Station(ModelInitByXml[XmlParserStation]):
             # Reason: Pylint's bug:
             # - `not-callable` false positive for class · Issue #8138 · pylint-dev/pylint
             #   https://github.com/pylint-dev/pylint/issues/8138
-            count = cast(tuple[int], session.query(func.count(Station.id)).one())  # pylint: disable=not-callable
+            count = cast("tuple[int]", session.query(func.count(Station.id)).one())  # pylint: disable=not-callable
             return count == (0,)
 
 
@@ -101,16 +118,16 @@ class Program(ModelInitByXml[XmlParserProgram]):
     """Program of radiko."""
 
     # Reason: Model. pylint: disable=too-many-instance-attributes
-    id = Column(Integer, autoincrement=True, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
     # The id in the radiko API is not unique...
-    radiko_id = Column(String(255))
-    to = Column(DATETIME)
-    ft = Column(DATETIME)
-    title = Column(String(255))
-    station_id: str = Column(String, ForeignKey("stations.id"), nullable=False)
-    date = Column(DATE)
-    area_id = Column(String(255))
-    archive_status = Column(INTEGER)
+    radiko_id: Mapped[str | None] = mapped_column(String(255))
+    to: Mapped[datetime.datetime | None] = mapped_column(DATETIME)
+    ft: Mapped[datetime.datetime | None] = mapped_column(DATETIME)
+    title: Mapped[str | None] = mapped_column(String(255))
+    station_id: Mapped[str] = mapped_column(String(255), ForeignKey("stations.id"), nullable=False)
+    date: Mapped[datetime.date | None] = mapped_column(DATE)
+    area_id: Mapped[str | None] = mapped_column(String(255))
+    archive_status: Mapped[int | None] = mapped_column(INTEGER)
 
     def init(self, xml_parser: XmlParserProgram) -> None:
         # Reason: "id" meets requirement of snake_case. pylint: disable=invalid-name
@@ -164,7 +181,7 @@ class Program(ModelInitByXml[XmlParserProgram]):
     @staticmethod
     def is_empty(target_date: datetime.date) -> bool:
         with SessionManager() as session:
-            count = cast(tuple[int], session.query(func.count(Program.id)).filter(Program.date == target_date).one())  # pylint: disable=not-callable
+            count = cast("tuple[int]", session.query(func.count(Program.id)).filter(Program.date == target_date).one())  # pylint: disable=not-callable
             return count == (0,)
 
     @staticmethod

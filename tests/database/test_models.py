@@ -6,7 +6,8 @@ from typing import cast
 import pytest
 from sqlalchemy import and_
 
-from radikopodcast.database.models import ArchiveStatusId, Program
+from radikopodcast.database.models import ArchiveStatusId
+from radikopodcast.database.models import Program
 from radikopodcast.database.session_manager import SessionManager
 
 
@@ -51,6 +52,6 @@ class TestProgram:
         with SessionManager() as session:
             list_condition_keyword = [Program.title.like(f"%{keyword}%")]
             return cast(
-                Program,
+                "Program",
                 session.query(Program).filter(and_(*list_condition_keyword)).order_by(Program.ft.asc()).first(),
             )

@@ -1,11 +1,13 @@
 """Tests for radiko_stream_spec_factory.py."""
 
 from dataclasses import dataclass
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING
+from typing import Any
+
+import pytest
 
 # Reason: Maybe, requires to update ffmpeg-python side.
 from ffmpeg.nodes import Stream  # type: ignore[import-untyped]
-import pytest
 
 from radikopodcast.radiko_stream_spec_factory import RadikoStreamSpecFactory
 
@@ -24,7 +26,7 @@ class MasterPlaylist:
 class TestRadikoStreamSpecFactory:
     """Tests for RadikoStreamSpecFactory."""
 
-    @pytest.mark.asyncio()
+    @pytest.mark.asyncio
     @pytest.mark.usefixtures("mock_master_playlist_client")
     async def test(self, model_program: "Program") -> None:
         """Function create() should create stream spec."""
@@ -48,7 +50,7 @@ class TestRadikoStreamSpecFactory:
         assert "None" in str(excinfo.value)
 
     @staticmethod
-    @pytest.mark.asyncio()
+    @pytest.mark.asyncio
     @pytest.mark.usefixtures("mock_master_playlist_client")
     async def test_file_exists_error(execution_environment: "Path", model_program: "Program") -> None:
         """Method: create() should raise FileExistsError when output file already exists."""

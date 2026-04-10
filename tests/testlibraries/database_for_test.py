@@ -8,9 +8,10 @@ from typing import TYPE_CHECKING
 
 import factory
 
-from radikopodcast.database.models import Base, Program
-from radikopodcast.radikoxml.xml_parser import XmlParserProgram
 from radikopodcast import Session
+from radikopodcast.database.models import Base
+from radikopodcast.database.models import Program
+from radikopodcast.radikoxml.xml_parser import XmlParserProgram
 from tests.testlibraries.database_engine_manager import DatabaseEngineManager
 
 if TYPE_CHECKING:
@@ -19,9 +20,7 @@ if TYPE_CHECKING:
     from sqlalchemy.orm.session import Session as SQLAlchemySession
 
 
-# Since factory_boy lacks typing stub.
-# Error message: Class cannot subclass "SQLAlchemyModelFactory" (has type "Any")
-class ProgramFactory(factory.alchemy.SQLAlchemyModelFactory):  # type: ignore[misc]
+class ProgramFactory(factory.alchemy.SQLAlchemyModelFactory):
     """Factory for Store model."""
 
     class Meta:  # Reason: Model. pylint: disable=too-few-public-methods
@@ -29,6 +28,11 @@ class ProgramFactory(factory.alchemy.SQLAlchemyModelFactory):  # type: ignore[mi
 
         model = Program
         sqlalchemy_session = Session
+
+    @classmethod
+    def create(cls, interface_program: XmlParserProgram, **_kwargs: object) -> Program:  # type: ignore[override]
+        """Create a Program instance via factory_boy."""
+        return cls(interface_program=interface_program)  # type: ignore[return-value]
 
 
 @dataclass
@@ -39,7 +43,7 @@ class FixtureRecord:
 
     def define(self) -> None:
         """This method defines factory_boy fixture records by using properties."""
-        ProgramFactory(interface_program=self.interface_program)
+        ProgramFactory.create(interface_program=self.interface_program)
 
 
 class DatabaseForTest:

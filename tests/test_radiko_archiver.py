@@ -4,9 +4,11 @@ import asyncio
 import sys
 from unittest.mock import AsyncMock
 
-from asynccpu.process_task_pool_executor import ProcessTaskPoolExecutor
-from asyncffmpeg import FFmpegCoroutine, FFmpegCoroutineFactory
 import pytest
+from asynccpu.process_task_pool_executor import ProcessTaskPoolExecutor
+from asyncffmpeg import FFmpegCoroutine
+from asyncffmpeg import FFmpegCoroutineFactory
+from asyncffmpeg import FFmpegProcess
 
 from radikopodcast.database.models import Program
 from radikopodcast.radiko_archiver import RadikoArchiver
@@ -22,7 +24,7 @@ class TestRadikoArchiver:
         asyncio.run(RadikoArchiver().archive(program))
 
     @staticmethod
-    @pytest.mark.asyncio()
+    @pytest.mark.asyncio
     @pytest.mark.skipif(sys.platform == "win32", reason="test for Linux only")
     @pytest.mark.usefixtures("record_program", "mock_master_playlist_client", "mock_ffmpeg_coroutine")
     async def test_with_process_task_pool_executor() -> None:
@@ -59,7 +61,7 @@ class TestRadikoArchiver:
         asyncio.run(RadikoArchiver().archive(program))
 
     @staticmethod
-    def mock_ffmpeg_coroutine_again() -> FFmpegCoroutine:
+    def mock_ffmpeg_coroutine_again() -> FFmpegCoroutine[FFmpegProcess]:
         """To fix execute as AsyncMock.
 
         Method execute seems to reset as PicklableMock...

@@ -1,9 +1,11 @@
 """Console script for radikopodcast."""
 
+from __future__ import annotations
+
 import asyncio
-from pathlib import Path
 import sys
-from typing import NoReturn, Optional
+from pathlib import Path
+from typing import NoReturn
 
 import click
 
@@ -17,7 +19,7 @@ from radikopodcast.radiko_podcast import RadikoPodcast
     type=click.Path(exists=True, resolve_path=True, path_type=Path),
     default=Path("config.yml"),
 )
-def radiko_podcast(file: Optional[Path]) -> NoReturn:
+def radiko_podcast(file: Path | None) -> NoReturn:
     """Console script for radiko Podcast."""
     podcast = RadikoPodcast(path_to_configuration=file)
     try:

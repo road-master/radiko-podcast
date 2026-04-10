@@ -1,14 +1,19 @@
 """Program schedule."""
 
-from datetime import datetime
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from radikopodcast.database.database import Database
-from radikopodcast.database.models import Program, Station
+from radikopodcast.database.models import Program
+from radikopodcast.database.models import Station
 from radikopodcast.database.program_downloader import ProgramDownloader
 from radikopodcast.radiko_datetime import RadikoDatetime
 from radikopodcast.radikoapi.radiko_api import RadikoApi
 from radikopodcast.radikoxml.xml_converter import XmlConverterStation
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 class ProgramSchedule:
@@ -21,7 +26,7 @@ class ProgramSchedule:
     def __init__(self, *, area_id: str = AREA_ID_DEFAULT) -> None:
         # pylint bug, see: https://github.com/PyCQA/pylint/issues/3882
         # pylint: disable=unsubscriptable-object
-        self.last_updated: Optional[datetime] = None
+        self.last_updated: datetime | None = None
         self.area_id = area_id
         self.database = Database()
         if Station.is_empty():
@@ -40,10 +45,8 @@ class ProgramSchedule:
         self.last_updated = now
 
     def has_downloaded(self, now: datetime) -> bool:
-        return (
-            self.last_updated is not None
-            and RadikoDatetime.is_same_radiko_date(now, self.last_updated)
-            or now.hour == self.HOUR_WHEN_RADIKO_PROGRAM_UPDATE
+        return (self.last_updated is not None and RadikoDatetime.is_same_radiko_date(now, self.last_updated)) or (
+            now.hour == self.HOUR_WHEN_RADIKO_PROGRAM_UPDATE
             and now.minute <= self.MINUTE_MARGIN_WHEN_RADIKO_PROGRAM_UPDATE
         )
 

@@ -1,12 +1,14 @@
 """Stream spec factory."""
 
 from logging import getLogger
-from pathlib import Path
 from typing import TYPE_CHECKING
+
+import anyio
 
 # noinspection PyPackageRequirements
 import ffmpeg
-from radikoplaylist import MasterPlaylistClient, TimeFreeMasterPlaylistRequest
+from radikoplaylist import MasterPlaylistClient
+from radikoplaylist import TimeFreeMasterPlaylistRequest
 
 if TYPE_CHECKING:
     from asyncffmpeg import StreamSpec
@@ -29,7 +31,7 @@ class RadikoStreamSpecFactory:
         """Creates."""
         out_file_name = f"./output/{self.program.ft_string}_{self.program.station_id}_{self.program.title}.m4a"
         self.logger.debug("out file name: %s", out_file_name)
-        if Path(out_file_name).exists():
+        if await anyio.Path(out_file_name).exists():
             self.logger.error("File already exists. out_file_name = %s", out_file_name)
             message = f"File already exists. {out_file_name=}"
             raise FileExistsError(message)
