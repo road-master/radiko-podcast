@@ -23,7 +23,6 @@ dev = [
   "docformatter[tomli]; python_version < '3.11'",
   "docformatter; python_version >= '3.11'",
   "dodgy",
-  "factory-boy",
   # The hacking depends flake8 ~=6.1.0 or ~=5.0.1 or ~=4.0.1.
   # We should avoid the versions that is not compatible with the hacking,
   # considering the speed of dependency calculation process
@@ -125,6 +124,8 @@ dependencies = [
   # - blocking-path-method-in-async-function (ASYNC240) | Ruff
   #   https://docs.astral.sh/ruff/rules/blocking-path-method-in-async-function/
   "anyio",
+  # To sanitize program title for file name
+  "pathvalidate",
   # To interact with radiko API to get media playlist
   "radikoplaylist",
   # To manage radiko programs by database (now using SQLite)
@@ -217,7 +218,6 @@ strict = true
 [[tool.mypy.overrides]]
 module = [
     "defusedxml.*",
-    "factory",
     "ffmpeg",
     "inflector",
 ]

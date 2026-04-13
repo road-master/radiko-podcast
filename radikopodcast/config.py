@@ -1,5 +1,7 @@
 """Configuration."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from dataclasses import field
 
@@ -15,3 +17,4 @@ class Config(YamlDataClassConfig):
     number_process: int = 3
     stop_if_file_exists: bool = False
     keywords: list[str] = field(default_factory=list)
+    radiko_session: str | None = None

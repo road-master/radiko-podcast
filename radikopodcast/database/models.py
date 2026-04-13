@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+# Reason: To prevent following error:
+#   E   sqlalchemy.orm.exc.MappedAnnotationError: Could not resolve all types within mapped annotation: "Mapped[datetime.datetime | None]".  Ensure all types are written correctly and are imported within the module in use.
 import datetime  # noqa: TC003
 from abc import abstractmethod
 from enum import IntEnum
@@ -47,7 +49,10 @@ class ArchiveStatusId(IntEnum):
     ARCHIVED = 4
 
 
-class Base(DeclarativeBase):
+# Reason: To follow SQLAlchemy 2.0 style of declarative mapping:
+# - Declarative Mapping Styles — SQLAlchemy 2.0 Documentation
+#   https://docs.sqlalchemy.org/en/20/orm/declarative_styles.html
+class Base(DeclarativeBase):  # pylint: disable=too-few-public-methods
     """Declarative base class."""
 
     metadata = MetaData()
@@ -130,12 +135,12 @@ class Program(ModelInitByXml[XmlParserProgram]):
     archive_status: Mapped[int | None] = mapped_column(INTEGER)
 
     def init(self, xml_parser: XmlParserProgram) -> None:
-        # Reason: "id" meets requirement of snake_case. pylint: disable=invalid-name
-        self.radiko_id = xml_parser.id
-        # Reason: Can't understand what "ft" points. pylint: disable=invalid-name
-        self.ft = xml_parser.ft
-        # Reason: "to" meets requirement of snake_case. pylint: disable=invalid-name
-        self.to = xml_parser.to
+        # Reason: "id" meets requirement of snake_case.
+        self.radiko_id = xml_parser.id  # pylint: disable=invalid-name
+        # Reason: Can't understand what "ft" points.
+        self.ft = xml_parser.ft  # pylint: disable=invalid-name
+        # Reason: "to" meets requirement of snake_case.
+        self.to = xml_parser.to  # pylint: disable=invalid-name
         self.title = xml_parser.title
         self.station_id = xml_parser.station_id
         self.date = xml_parser.date
@@ -202,3 +207,10 @@ class Program(ModelInitByXml[XmlParserProgram]):
     def delete(boundary_date: datetime.date) -> None:
         with SessionManager() as session:
             session.query(Program).filter(Program.date < boundary_date).delete()
+
+    def is_timefree30_required(self) -> bool:
+        """Returns whether the program requires time-free 30-day download."""
+        if not self.ft:
+            message = f"{self.ft=}"
+            raise ValueError(message)
+        return RadikoDatetime.is_timefree30_required(self.ft)

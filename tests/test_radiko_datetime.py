@@ -20,6 +20,11 @@ class TestRadikoDatetime:
         (datetime(2021, 1, 8, 4, 59, 59, tzinfo=JST), date(2020, 12, 31)),
         (datetime(2021, 1, 8, 5, 0, 0, tzinfo=JST), date(2021, 1, 1)),
     ]
+    CASE_TIMEFREE30_OLDEST_DAY: ClassVar = [
+        (datetime(2021, 1, 7, 21, 55, 15, tzinfo=JST), date(2020, 12, 8)),
+        (datetime(2021, 1, 8, 4, 59, 59, tzinfo=JST), date(2020, 12, 8)),
+        (datetime(2021, 1, 8, 5, 0, 0, tzinfo=JST), date(2020, 12, 9)),
+    ]
     CASE_TIME_FREE_DAY_BEFORE_NEWEST_DAY: ClassVar = [
         (datetime(2021, 1, 7, 21, 55, 15, tzinfo=JST), date(2021, 1, 6)),
         (datetime(2021, 1, 8, 4, 59, 59, tzinfo=JST), date(2021, 1, 6)),
@@ -53,6 +58,14 @@ class TestRadikoDatetime:
     )
     def test_time_free_oldest_day(argument: datetime, expect: date) -> None:
         assert RadikoDatetime.time_free_oldest_date(argument) == expect
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        ("argument", "expect"),
+        CASE_TIMEFREE30_OLDEST_DAY,
+    )
+    def test_timefree30_oldest_day(argument: datetime, expect: date) -> None:
+        assert RadikoDatetime.timefree30_oldest_date(argument) == expect
 
     @staticmethod
     @pytest.mark.parametrize(

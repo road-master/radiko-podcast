@@ -23,11 +23,12 @@ class ProgramSchedule:
     HOUR_WHEN_RADIKO_PROGRAM_UPDATE = 5
     MINUTE_MARGIN_WHEN_RADIKO_PROGRAM_UPDATE = 15
 
-    def __init__(self, *, area_id: str = AREA_ID_DEFAULT) -> None:
+    def __init__(self, *, area_id: str = AREA_ID_DEFAULT, radiko_session: str | None = None) -> None:
         # pylint bug, see: https://github.com/PyCQA/pylint/issues/3882
         # pylint: disable=unsubscriptable-object
         self.last_updated: datetime | None = None
         self.area_id = area_id
+        self.radiko_session = radiko_session
         self.database = Database()
         if Station.is_empty():
             Station.save_all(XmlConverterStation(RadikoApi(area_id=self.area_id).get_station()).to_model())
@@ -52,9 +53,13 @@ class ProgramSchedule:
 
     def add(self, now: datetime) -> None:
         """Adds programs from radiko API."""
-        program_downloader = ProgramDownloader(now, area_id=self.area_id)
+        program_downloader = ProgramDownloader(now, area_id=self.area_id, radiko_session=self.radiko_session)
         program_downloader.download_all_time_free_programs()
 
-    @staticmethod
-    def remove(now: datetime) -> None:
-        Program.delete(RadikoDatetime.time_free_oldest_date(now))
+    def remove(self, now: datetime) -> None:
+        oldest = (
+            RadikoDatetime.timefree30_oldest_date(now)
+            if self.radiko_session
+            else RadikoDatetime.time_free_oldest_date(now)
+        )
+        Program.delete(oldest)

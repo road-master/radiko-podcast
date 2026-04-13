@@ -6,12 +6,13 @@ from unittest.mock import AsyncMock
 
 import pytest
 from asynccpu.process_task_pool_executor import ProcessTaskPoolExecutor
-from asyncffmpeg import FFmpegCoroutine
-from asyncffmpeg import FFmpegCoroutineFactory
-from asyncffmpeg import FFmpegProcess
+from pytest_mock import MockFixture
 
+from radikopodcast.archive_workflow import RadikoArchiveWorkflow
 from radikopodcast.database.models import Program
-from radikopodcast.radiko_archiver import RadikoArchiver
+from radikopodcast.output_directory import OutputDirectory
+from radikopodcast.programaggregate.factory import RadikoProgramAggregateToArchiveFactory
+from radikopodcast.programaggregate.timefree30 import RadikoProgramAggregateToArchiveTimeFree30
 
 
 class TestRadikoArchiver:
@@ -19,9 +20,8 @@ class TestRadikoArchiver:
 
     @pytest.mark.usefixtures("record_program", "mock_master_playlist_client", "mock_ffmpeg_coroutine")
     def test(self) -> None:
-        self.mock_ffmpeg_coroutine_again()
         program = Program.find(["ROPPONGI PASSION PIT"])[0]
-        asyncio.run(RadikoArchiver().archive(program))
+        asyncio.run(RadikoArchiveWorkflow(RadikoProgramAggregateToArchiveFactory(OutputDirectory())).execute(program))
 
     @staticmethod
     @pytest.mark.asyncio
@@ -33,11 +33,11 @@ class TestRadikoArchiver:
         During running RadikoArchiver.archive().
         """
         program = Program.find(["ROPPONGI PASSION PIT"])[0]
-        radiko_archiver = RadikoArchiver()
+        radiko_archiver = RadikoArchiveWorkflow(RadikoProgramAggregateToArchiveFactory(OutputDirectory()))
         # Reason: To test that process can teardown when running asynchronous task
         with pytest.raises(KeyboardInterrupt):  # noqa: PT012, SIM117
             with ProcessTaskPoolExecutor() as executor:
-                executor.create_process_task(radiko_archiver.archive, program)
+                executor.create_process_task(radiko_archiver.execute, program)
                 raise KeyboardInterrupt
 
     @pytest.mark.skipif(sys.platform == "win32", reason="test for Linux only")
@@ -45,28 +45,29 @@ class TestRadikoArchiver:
     @pytest.mark.parametrize("type_error", [FileExistsError, KeyboardInterrupt])
     def test_error(self, type_error: type[BaseException]) -> None:
         """Specific error should not catch in method: archive()."""
-        ffmpeg_coroutine = self.mock_ffmpeg_coroutine_again()
+        factory = RadikoProgramAggregateToArchiveFactory(OutputDirectory())
         # Reason: Creating mock.
-        ffmpeg_coroutine.execute.side_effect = type_error  # type: ignore[attr-defined]
+        factory.ffmpeg_coroutine.execute.side_effect = type_error  # type: ignore[attr-defined]
         program = Program.find(["ROPPONGI PASSION PIT"])[0]
         with pytest.raises(type_error):
-            asyncio.run(RadikoArchiver(stop_if_file_exists=True).archive(program))
+            asyncio.run(RadikoArchiveWorkflow(factory, stop_if_file_exists=True).execute(program))
 
     @pytest.mark.usefixtures("record_program", "mock_master_playlist_client", "mock_ffmpeg_coroutine")
     def test_file_exists_skip(self) -> None:
-        ffmpeg_coroutine = self.mock_ffmpeg_coroutine_again()
+        factory = RadikoProgramAggregateToArchiveFactory(OutputDirectory())
         # Reason: Creating mock.
-        ffmpeg_coroutine.execute.side_effect = FileExistsError  # type: ignore[attr-defined]
+        factory.ffmpeg_coroutine.execute.side_effect = FileExistsError  # type: ignore[attr-defined]
         program = Program.find(["ROPPONGI PASSION PIT"])[0]
-        asyncio.run(RadikoArchiver().archive(program))
+        asyncio.run(RadikoArchiveWorkflow(factory).execute(program))
 
-    @staticmethod
-    def mock_ffmpeg_coroutine_again() -> FFmpegCoroutine[FFmpegProcess]:
-        """To fix execute as AsyncMock.
-
-        Method execute seems to reset as PicklableMock...
-        """
-        ffmpeg_coroutine = FFmpegCoroutineFactory.create()
-        # Reason: Creating mock.
-        ffmpeg_coroutine.execute = AsyncMock()  # type: ignore[method-assign]
-        return ffmpeg_coroutine
+    @pytest.mark.asyncio
+    @pytest.mark.usefixtures("record_program")
+    async def test_timefree30_branch(self, mocker: MockFixture) -> None:
+        """When radiko_session is set, RadikoProgramAggregateToArchiveTimeFree30.archive() should be called."""
+        mock_archive = mocker.patch.object(RadikoProgramAggregateToArchiveTimeFree30, "archive", new=AsyncMock())
+        program = Program.find(["ROPPONGI PASSION PIT"])[0]
+        factory = RadikoProgramAggregateToArchiveFactory(OutputDirectory(), radiko_session="session_token")
+        radiko_archive_workflow = RadikoArchiveWorkflow(factory)
+        await radiko_archive_workflow.execute(program)
+        mock_archive.assert_called_once()
+        assert radiko_archive_workflow.radiko_program_aggregate_factory.radiko_session == "session_token"
