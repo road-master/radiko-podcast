@@ -9,6 +9,7 @@ from abc import abstractmethod
 from enum import IntEnum
 from typing import TYPE_CHECKING
 from typing import Generic
+from typing import Optional
 from typing import TypeVar
 from typing import cast
 
@@ -99,9 +100,11 @@ class Station(ModelInitByXml[XmlParserStation]):
     """Station of radiko."""
 
     id: Mapped[str] = mapped_column(String(255), primary_key=True)
-    name: Mapped[str | None] = mapped_column(String(255))
+    # Reason: To allow null in Python 3.9 with SQLAlchemy 2
+    name: Mapped[Optional[str]] = mapped_column(String(255))  # noqa: UP045
     list_program: Mapped[list[Program]] = relationship("Program", backref="station")
-    transfer_target: Mapped[str | None] = mapped_column(String(255))
+    # Reason: To allow null in Python 3.9 with SQLAlchemy 2
+    transfer_target: Mapped[Optional[str]] = mapped_column(String(255))  # noqa: UP045
 
     def init(self, xml_parser: XmlParserStation) -> None:
         # Reason: "id" meets requirement of snake_case. pylint: disable=invalid-name
@@ -125,14 +128,21 @@ class Program(ModelInitByXml[XmlParserProgram]):
     # Reason: Model. pylint: disable=too-many-instance-attributes
     id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
     # The id in the radiko API is not unique...
-    radiko_id: Mapped[str | None] = mapped_column(String(255))
-    to: Mapped[datetime.datetime | None] = mapped_column(DATETIME)
-    ft: Mapped[datetime.datetime | None] = mapped_column(DATETIME)
-    title: Mapped[str | None] = mapped_column(String(255))
+    # Reason: To allow null in Python 3.9 with SQLAlchemy 2
+    radiko_id: Mapped[Optional[str]] = mapped_column(String(255))  # noqa: UP045
+    # Reason: To allow null in Python 3.9 with SQLAlchemy 2
+    to: Mapped[Optional[datetime.datetime]] = mapped_column(DATETIME)  # noqa: UP045
+    # Reason: To allow null in Python 3.9 with SQLAlchemy 2
+    ft: Mapped[Optional[datetime.datetime]] = mapped_column(DATETIME)  # noqa: UP045
+    # Reason: To allow null in Python 3.9 with SQLAlchemy 2
+    title: Mapped[Optional[str]] = mapped_column(String(255))  # noqa: UP045
     station_id: Mapped[str] = mapped_column(String(255), ForeignKey("stations.id"), nullable=False)
-    date: Mapped[datetime.date | None] = mapped_column(DATE)
-    area_id: Mapped[str | None] = mapped_column(String(255))
-    archive_status: Mapped[int | None] = mapped_column(INTEGER)
+    # Reason: To allow null in Python 3.9 with SQLAlchemy 2
+    date: Mapped[Optional[datetime.date]] = mapped_column(DATE)  # noqa: UP045
+    # Reason: To allow null in Python 3.9 with SQLAlchemy 2
+    area_id: Mapped[Optional[str]] = mapped_column(String(255))  # noqa: UP045
+    # Reason: To allow null in Python 3.9 with SQLAlchemy 2
+    archive_status: Mapped[Optional[int]] = mapped_column(INTEGER)  # noqa: UP045
 
     def init(self, xml_parser: XmlParserProgram) -> None:
         # Reason: "id" meets requirement of snake_case.
