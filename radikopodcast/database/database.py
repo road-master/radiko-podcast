@@ -4,8 +4,8 @@ from logging import getLogger
 
 from sqlalchemy import inspect
 
-from radikopodcast.database.models import Base
 from radikopodcast import Session
+from radikopodcast.database.models import Base
 
 
 class Database:

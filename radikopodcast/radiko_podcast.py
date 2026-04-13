@@ -1,18 +1,26 @@
 """Main module."""
 
+from __future__ import annotations
+
 import asyncio
 import logging
 from logging import LogRecord
-from pathlib import Path
-import queue
-from typing import Any, Callable, Optional
+from typing import TYPE_CHECKING
+from typing import Any
+from typing import Callable
 
-# Reason: Following export method in __init__.py from Effective Python 2nd Edition item 85
 from asynccpu import ProcessTaskPoolExecutor
 
 from radikopodcast import CONFIG
+from radikopodcast.archive_workflow import RadikoArchiveWorkflow
 from radikopodcast.database.program_schedule import ProgramSchedule
-from radikopodcast.radiko_archiver import RadikoArchiver, TIME_TO_FORCE_TERMINATION
+from radikopodcast.output_directory import OutputDirectory
+from radikopodcast.programaggregate.factory import RadikoProgramAggregateToArchiveFactory
+from radikopodcast.programaggregate.normal import TIME_TO_FORCE_TERMINATION
+
+if TYPE_CHECKING:
+    import queue
+    from pathlib import Path
 
 
 class RadikoPodcast:
@@ -21,22 +29,27 @@ class RadikoPodcast:
     def __init__(
         self,
         *,
-        path_to_configuration: Optional[Path] = None,
+        path_to_configuration: Path | None = None,
         time_to_force_termination: int = TIME_TO_FORCE_TERMINATION,
         # Reason: This argument name is API. pylint: disable=redefined-outer-name
-        queue: Optional[queue.Queue[LogRecord]] = None,
-        configurer: Optional[Callable[[], Any]] = None,
+        queue: queue.Queue[LogRecord] | None = None,
+        configurer: Callable[[], Any] | None = None,
     ) -> None:
         logging.basicConfig(level=logging.DEBUG)
-        # Reason Yaml Dataclass Config's bug.
-        CONFIG.load(path_to_configuration)  # type: ignore[arg-type]
-        self.radiko_archiver = RadikoArchiver(
+        CONFIG.load(path_to_configuration)
+        output_directory = OutputDirectory()
+        program_aggregate_factory = RadikoProgramAggregateToArchiveFactory(
+            output_directory,
             time_to_force_termination=time_to_force_termination,
+            radiko_session=CONFIG.radiko_session,
+        )
+        self.radiko_archiver = RadikoArchiveWorkflow(
+            program_aggregate_factory,
             stop_if_file_exists=CONFIG.stop_if_file_exists,
         )
         self.queue = queue
         self.configurer = configurer
-        self.program_schedule = ProgramSchedule(area_id=CONFIG.area_id)
+        self.program_schedule = ProgramSchedule(area_id=CONFIG.area_id, radiko_session=CONFIG.radiko_session)
         self.logger = logging.getLogger(__name__)
 
     def run(self) -> None:
@@ -60,7 +73,7 @@ class RadikoPodcast:
                 for program in self.program_schedule.search(CONFIG.keywords):
                     self.logger.debug("Start: program.title = %s", program.title)
                     # Reason: pylint bug. pylint: disable=no-member
-                    executor.create_process_task(self.radiko_archiver.archive, program)
+                    executor.create_process_task(self.radiko_archiver.execute, program)
                     self.logger.debug("Finish: program.title = %s", program.title)
                 await self.sleep(180)
 

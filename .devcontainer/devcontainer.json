@@ -7,8 +7,8 @@
 	// Update the 'dockerComposeFile' list if you have more compose files or use different names.
 	// The .devcontainer/docker-compose.yml file contains any overrides you need/want to make.
 	"dockerComposeFile": [
-		"../docker-compose.yml",
-		"docker-compose.yml"
+		"../compose.yml",
+		"compose.yml"
 	],
 
 	// The 'service' property is the name of the service for the container that VS Code should
@@ -23,52 +23,54 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"anthropic.claude-code",
 				"GitHub.copilot",
+				"streetsidesoftware.code-spell-checker",
+				"tamasfe.even-better-toml",
+				"charliermarsh.ruff",
 				"ms-python.python",
 				"ms-python.flake8",
-				"ms-python.isort",
 				"ms-python.mypy-type-checker",
 				"ms-python.pylint",
-				"charliermarsh.ruff",
-				"wk-j.save-and-run",
-				"bungcip.better-toml",
-				"streetsidesoftware.code-spell-checker"
+				"pycqa.bandit-pycqa",
+				"emeraldwalk.RunOnSave",
+				"grapecity.gc-excelviewer"
 			],
 			"settings": {
 				// Whether to display inlay hints for pytest fixture argument types.
 				// - Settings Reference for Python
 				//   https://code.visualstudio.com/docs/python/settings-reference
 				"python.analysis.inlayHints.pytestParameters": true,
-				"python.formatting.provider": "black",
 				// This setting forcibly generate __pycache__.
 				// "python.testing.pytestEnabled": true,
 				"[python]": {
-					"editor.formatOnSave": true,
+					"editor.defaultFormatter": "charliermarsh.ruff",
 					"editor.codeActionsOnSave": {
-						"source.fixAll": true,
-						"source.organizeImports": true
+						"source.fixAll": "explicit",
+						"source.organizeImports": "explicit"
+					},
+					"editor.formatOnSave": true
+				},
+				"bandit.args": [
+					"--configfile",
+					"pyproject.toml"
+				],
+				"cSpell.customDictionaries": {
+					"project-words": {
+					"name": "project-words",
+					"path": "${workspaceRoot}/project-words.txt",
+					"description": "Words used in this project",
+					"addWords": true
 					}
 				},
-				"ruff.organizeImports": false,
 				"emeraldwalk.runonsave": {
 					"commands": [
 						{
 							"match": ".*\\.py",
-							"cmd": "pipenv run autoflake --in-place ${file}"
-						},
-						{
-							"match": ".*\\.py",
-							"cmd": "pipenv run docformatter --in-place ${file}"
+							"cmd": "uv run docformatter --in-place ${file}"
 						}
 					]
-				},
-				"cSpell.customDictionaries": {
-					"project-words": {
-					  "name": "project-words",
-					  "path": "${workspaceRoot}/project-words.txt",
-					  "description": "Words used in this project",
-					  "addWords": true
-				}				  
+				}
 			}
 		}
 	}

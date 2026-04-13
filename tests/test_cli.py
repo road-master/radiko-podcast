@@ -3,9 +3,9 @@
 import re
 from unittest import mock
 
+import pytest
 from click.testing import CliRunner
 from freezegun.api import freeze_time
-import pytest
 
 from radikopodcast import cli
 from radikopodcast.radiko_podcast import RadikoPodcast

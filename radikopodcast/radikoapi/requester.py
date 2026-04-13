@@ -3,9 +3,11 @@
 from http import HTTPStatus
 from logging import getLogger
 
-from radikoplaylist.exceptions import BadHttpStatusCodeError, HttpRequestTimeoutError
 import requests
-from requests import Response, Timeout
+from radikoplaylist.exceptions import BadHttpStatusCodeError
+from radikoplaylist.exceptions import HttpRequestTimeoutError
+from requests import Response
+from requests import Timeout
 
 
 class Requester:

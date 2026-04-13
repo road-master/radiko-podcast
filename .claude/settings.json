@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run invoke lint"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(uv run invoke clean*)",
+      "Bash(uv run invoke dist*)",
+      "Bash(uv run invoke lint*)",
+      "Bash(uv run invoke path*)",
+      "Bash(uv run invoke style*)",
+      "Bash(uv run invoke test*)",
+      "Bash(uv run pytest*)",
+      "Edit(radikopodcast/**)",
+      "Edit(tests/**)"
+    ],
+    "deny": [
+      "Bash(git commit*)",
+      "Bash(git push*)",
+      "Bash(rm*)",
+      "Bash(sudo*)",
+      "Read(.env.*)",
+      "Read(config.yml)"
+    ]
+  }
+}

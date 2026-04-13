@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   radiko-podcast:
     build:
@@ -7,3 +6,8 @@ services:
     volumes:
       - ./config.yml:/workspace/config.yml
       - ./output:/workspace/output
+      # - Using uv in Docker | uv
+      #   https://docs.astral.sh/uv/guides/integration/docker/#caching
+      - uv-cache:/root/.cache/uv
+volumes:
+  uv-cache:

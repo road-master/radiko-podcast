@@ -1,10 +1,11 @@
 """Tests for xml_parser.py."""
 
-from defusedxml import ElementTree
 import pytest
+from defusedxml import ElementTree
 
 from radikopodcast.exceptions import XmlParseError
-from radikopodcast.radikoxml.xml_parser import XmlParserProgram, XmlParserStation
+from radikopodcast.radikoxml.xml_parser import XmlParserProgram
+from radikopodcast.radikoxml.xml_parser import XmlParserStation
 
 
 class TestXmlParserStation:

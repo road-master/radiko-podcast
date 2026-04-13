@@ -1,2 +1,1 @@
-include radikopodcast/py.typed
 recursive-include docs *

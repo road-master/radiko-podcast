@@ -1,13 +1,20 @@
 """Download programs."""
 
-from collections.abc import Generator
-from datetime import date, datetime, timedelta
+from __future__ import annotations
+
+from datetime import date
+from datetime import datetime
+from datetime import timedelta
 from logging import getLogger
+from typing import TYPE_CHECKING
 
 from radikopodcast.database.models import Program
 from radikopodcast.radiko_datetime import RadikoDatetime
 from radikopodcast.radikoapi.radiko_api import RadikoApi
 from radikopodcast.radikoxml.xml_converter import XmlConverterProgram
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 
 class ProgramDownloader:
@@ -15,8 +22,17 @@ class ProgramDownloader:
 
     AREA_ID_DEFAULT = "JP13"  # TOKYO
 
-    def __init__(self, base_datetime: datetime, *, area_id: str = AREA_ID_DEFAULT) -> None:
-        self.time_free_oldest_date = RadikoDatetime.time_free_oldest_date(base_datetime)
+    def __init__(
+        self,
+        base_datetime: datetime,
+        *,
+        area_id: str = AREA_ID_DEFAULT,
+        radiko_session: str | None = None,
+    ) -> None:
+        if radiko_session:
+            self.time_free_oldest_date = RadikoDatetime.timefree30_oldest_date(base_datetime)
+        else:
+            self.time_free_oldest_date = RadikoDatetime.time_free_oldest_date(base_datetime)
         self.time_free_day_before_newest_date = RadikoDatetime.time_free_day_before_newest_date(base_datetime)
         self.area_id = area_id
         self.logger = getLogger(__name__)

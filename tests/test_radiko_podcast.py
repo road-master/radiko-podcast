@@ -1,12 +1,12 @@
 """Tests for radiko_podcast.py."""
 
 import asyncio
-from pathlib import Path
 import sys
+from pathlib import Path
 from unittest import mock
 
-from freezegun.api import freeze_time
 import pytest
+from freezegun.api import freeze_time
 
 from radikopodcast.radiko_podcast import RadikoPodcast
 

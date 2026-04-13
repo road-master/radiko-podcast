@@ -5,9 +5,13 @@ __email__ = "roadmasternavi@gmail.com"
 __version__ = "1.0.3"
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import sessionmaker
 
 from radikopodcast.config import Config
 
-Session = scoped_session(sessionmaker(bind=create_engine("sqlite://")))
+# Reason: To follow the official documentation of SQLAlchemy:
+# - Session Basics — SQLAlchemy 2.0 Documentation
+#   https://docs.sqlalchemy.org/en/20/orm/session_basics.html
+Session = scoped_session(sessionmaker(bind=create_engine("sqlite://")))  # pylint: disable=invalid-name
 CONFIG: Config = Config()

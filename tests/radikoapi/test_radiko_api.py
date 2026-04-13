@@ -3,8 +3,8 @@
 from datetime import date
 from typing import TYPE_CHECKING
 
-from defusedxml import ElementTree
 import pytest
+from defusedxml import ElementTree
 
 from radikopodcast.radikoapi.radiko_api import RadikoApi
 

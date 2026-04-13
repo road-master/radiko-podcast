@@ -1,9 +1,10 @@
 """Tests for requester.py."""
 
 import pytest
-from radikoplaylist.exceptions import BadHttpStatusCodeError, HttpRequestTimeoutError
-from requests import Timeout
 import requests_mock as requests_mock_module
+from radikoplaylist.exceptions import BadHttpStatusCodeError
+from radikoplaylist.exceptions import HttpRequestTimeoutError
+from requests import Timeout
 from requests_mock import Mocker
 
 from radikopodcast.radikoapi.requester import Requester

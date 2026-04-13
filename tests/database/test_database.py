@@ -3,8 +3,8 @@
 import pytest
 import sqlalchemy
 
-from radikopodcast.database.database import Database
 from radikopodcast import Session
+from radikopodcast.database.database import Database
 
 
 class TestDatabase:

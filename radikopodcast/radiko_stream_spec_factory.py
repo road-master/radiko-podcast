@@ -1,24 +1,26 @@
 """Stream spec factory."""
 
 from logging import getLogger
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 # noinspection PyPackageRequirements
 import ffmpeg
-from radikoplaylist import MasterPlaylistClient, TimeFreeMasterPlaylistRequest
+from radikoplaylist import MasterPlaylistClient
+from radikoplaylist import TimeFreeMasterPlaylistRequest
 
 if TYPE_CHECKING:
     from asyncffmpeg import StreamSpec
 
     from radikopodcast.database.models import Program
+    from radikopodcast.output_directory import OutputDirectory
 
 
 class RadikoStreamSpecFactory:
     """Stream spec factory."""
 
-    def __init__(self, program: "Program") -> None:
+    def __init__(self, program: "Program", output_directory: "OutputDirectory") -> None:
         self.program = program
+        self.output_directory = output_directory
         if not self.program.area_id:
             message = f"{self.program.area_id=}"
             raise ValueError(message)
@@ -27,12 +29,6 @@ class RadikoStreamSpecFactory:
 
     async def create(self) -> "StreamSpec":
         """Creates."""
-        out_file_name = f"./output/{self.program.ft_string}_{self.program.station_id}_{self.program.title}.m4a"
-        self.logger.debug("out file name: %s", out_file_name)
-        if Path(out_file_name).exists():
-            self.logger.error("File already exists. out_file_name = %s", out_file_name)
-            message = f"File already exists. {out_file_name=}"
-            raise FileExistsError(message)
         master_playlist_request = TimeFreeMasterPlaylistRequest(
             self.program.station_id,
             int(self.program.ft_string),
@@ -40,4 +36,10 @@ class RadikoStreamSpecFactory:
         )
         master_playlist = MasterPlaylistClient.get(master_playlist_request, area_id=self.area_id)
         stream = ffmpeg.input(master_playlist.media_playlist_url, headers=master_playlist.headers, copytb="1")
-        return ffmpeg.output(stream, out_file_name, f="mp4", c="copy")
+        return ffmpeg.output(
+            stream,
+            # Use as_posix() to ensure forward slashes on Windows, which FFmpeg accepts cross-platform.
+            (await self.output_directory.get_output_file_path(self.program)).as_posix(),
+            f="mp4",
+            c="copy",
+        )

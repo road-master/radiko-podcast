@@ -1,12 +1,16 @@
 """This module implements SQLAlchemy session life cycle to prevent forgetting close."""
 
+from __future__ import annotations
+
 from contextlib import AbstractContextManager
-from types import TracebackType
-from typing import Optional
+from typing import TYPE_CHECKING
 
 from sqlalchemy.orm.session import Session as SQLAlchemySession
 
 from radikopodcast import Session
+
+if TYPE_CHECKING:
+    from types import TracebackType
 
 
 class SessionManager(AbstractContextManager[SQLAlchemySession]):
@@ -20,8 +24,8 @@ class SessionManager(AbstractContextManager[SQLAlchemySession]):
 
     def __exit__(
         self,
-        exc_type: Optional[type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
     ) -> None:
         self._session.close()
