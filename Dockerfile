@@ -1,13 +1,20 @@
-FROM mstmelody/python-ffmpeg:20240327020500
-# sqlite: To cache radiko programs locally
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    sqlite=2.8.17-15fakesync1build1 \
+FROM futureys/claude-code-python-development:20260407212500
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    curl/stable \
+    xz-utils/stable \
+    # sqlite: To cache radiko programs locally
+    sqlite3/stable \
+ && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
-# see: https://pythonspeed.com/articles/activate-virtualenv-dockerfile/
-ENV PIPENV_VENV_IN_PROJECT=1
-COPY radikopodcast LICENSE Pipfile pyproject.toml README.md setup.cfg setup.py /workspace/
-RUN pip3 --no-cache-dir install pipenv==2023.12.1 \
- && pipenv install --deploy --skip-lock --dev
-COPY . /workspace
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN curl --location https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-02-28-12-59/ffmpeg-n8.0.1-66-g27b8d1a017-linuxarm64-gpl-shared-8.0.tar.xz | tar --extract --xz --strip-components 2 --directory=/usr/bin
+# To prevent following error:
+#   ffmpeg: error while loading shared libraries: libavdevice.so.62: cannot open shared object file: No such file or directory
+COPY libavdevice_so.conf /etc/ld.so.conf.d/
+RUN ldconfig
+COPY radikopodcast LICENSE pyproject.toml README.md /workspace/
+RUN uv sync --python 3.13
+COPY . /workspace/
 VOLUME ["/workspace/output"]
-ENTRYPOINT [ "pipenv", "run", "radiko-podcast" ]
+ENTRYPOINT [ "uv", "run" ]
+CMD ["pytest"]
