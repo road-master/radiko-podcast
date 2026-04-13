@@ -129,7 +129,7 @@ dependencies = [
   # To interact with radiko API to get media playlist
   "radikoplaylist",
   # To manage radiko programs by database (now using SQLite)
-  "sqlalchemy; platform_machine == 'x86_64'",
+  "sqlalchemy; platform_machine == 'x86_64' or platform_machine == 'AMD64'",
   # To prevent following error:
   #   error: Distribution `greenlet==3.4.0 @ registry+https://pypi.org/simple` can't be installed because it doesn't have a source distribution or wheel for the current platform
   # - greenlet is not installed on Apple M1 · Issue #7714 · sqlalchemy/sqlalchemy
