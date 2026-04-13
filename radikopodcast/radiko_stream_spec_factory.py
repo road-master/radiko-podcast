@@ -38,7 +38,8 @@ class RadikoStreamSpecFactory:
         stream = ffmpeg.input(master_playlist.media_playlist_url, headers=master_playlist.headers, copytb="1")
         return ffmpeg.output(
             stream,
-            str(await self.output_directory.get_output_file_path(self.program)),
+            # Use as_posix() to ensure forward slashes on Windows, which FFmpeg accepts cross-platform.
+            (await self.output_directory.get_output_file_path(self.program)).as_posix(),
             f="mp4",
             c="copy",
         )
