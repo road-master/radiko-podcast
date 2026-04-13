@@ -20,7 +20,7 @@ on:
   schedule:
     - cron: '44 6 * * 2'
 
-jjobs:
+jobs:
   call-workflow:
     permissions:
       # required for all workflows

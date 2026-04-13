@@ -2,11 +2,11 @@
 
 [![Test](https://github.com/road-master/radiko-podcast/workflows/Test/badge.svg)](https://github.com/road-master/radiko-podcast/actions?query=workflow%3ATest)
 [![CodeQL](https://github.com/road-master/radiko-podcast/workflows/CodeQL/badge.svg)](https://github.com/road-master/radiko-podcast/actions?query=workflow%3ACodeQL)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/9b52f1765b2e797d293d/test_coverage)](https://codeclimate.com/github/road-master/radiko-podcast/test_coverage)
-[![Maintainability](https://api.codeclimate.com/v1/badges/9b52f1765b2e797d293d/maintainability)](https://codeclimate.com/github/road-master/radiko-podcast/maintainability)
-[![Code Climate technical debt](https://img.shields.io/codeclimate/tech-debt/road-master/radiko-podcast)](https://codeclimate.com/github/road-master/radiko-podcast)
+[![Code Coverage](https://qlty.sh/gh/road-master/projects/radiko-podcast/coverage.svg)](https://qlty.sh/gh/road-master/projects/radiko-podcast)
+[![Maintainability](https://qlty.sh/gh/road-master/projects/radiko-podcast/maintainability.svg)](https://qlty.sh/gh/road-master/projects/radiko-podcast)
+[![Dependabot](https://flat.badgen.net/github/dependabot/road-master/radiko-podcast?icon=dependabot)](https://github.com/road-master/radiko-podcast/security/dependabot)
 [![Python versions](https://img.shields.io/pypi/pyversions/radikopodcast.svg)](https://pypi.org/project/radikopodcast)
-[![Twitter URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Froad-master%2Fradiko-podcast)](http://twitter.com/share?text=radiko%20Podcast&url=https://pypi.org/project/radikopodcast/&hashtags=python)
+[![X URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Froad-master%2Fradiko-podcast)](https://x.com/intent/post?text=radiko%20Podcast&url=https%3A%2F%2Fpypi.org%2Fproject%2Fradikopodcast%2F&hashtags=python)
 
 タイムフリー 1 週間では足りない人向けの radiko 番組自動アーカイブコマンドです
 
@@ -65,6 +65,12 @@ keywords:
   - "K's Transmission"
   - "ROPPONGI PASSION PIT"
   - "カフェイン11"
+# タイムフリー30 プランに加入したアカウントでログインした際の radiko_session を設定すると、
+# 30 日まで遡ってアーカイブできます
+# この値は開発者ツールの Network タブを開き、
+# ログインした radiko で画面遷移した際のリクエストをクリック、
+# Headers タブで Request Headers の Cookie を参照するなどして確認できます
+radiko_session: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ### 3. `output/` ディレクトリーの作成
