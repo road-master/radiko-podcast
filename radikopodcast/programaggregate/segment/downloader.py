@@ -13,13 +13,13 @@ from asynccpu import ProcessTaskPoolExecutor
 from radikoplaylist import MasterPlaylistClient
 from radikoplaylist import TimeFree30DayMasterPlaylistRequest
 
-from radikopodcast.programaggregate.segment.discovery import MasterPlaylistRequestFactory
 from radikopodcast.radiko_datetime import RadikoDatetime
 
 if TYPE_CHECKING:
     import anyio
 
     from radikopodcast.programaggregate.segment.directory import SegmentDirectory
+    from radikopodcast.programaggregate.segment.discovery import MasterPlaylistRequestFactory
 
 _MAX_WORKERS = 3
 _SEGMENT_DURATION_SECONDS = 5
@@ -28,7 +28,7 @@ _SEGMENT_DURATION_SECONDS = 5
 class SegmentsDownloader:
     """Downloads segments in parallel using ffmpeg and ProcessTaskPoolExecutor."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments, too-many-positional-arguments
         self,
         station_id: str,
         area_id: str,

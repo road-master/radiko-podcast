@@ -14,10 +14,10 @@ import pytest
 from radikoplaylist import TimeFree30DayMasterPlaylistRequest
 
 from radikopodcast.output_directory import OutputDirectory
+from radikopodcast.programaggregate.segment.discovery import SegmentsDiscovery
+from radikopodcast.programaggregate.segment.discovery import get_segment_datetimes
+from radikopodcast.programaggregate.segment.downloader import SegmentsDownloader
 from radikopodcast.programaggregate.timefree30 import RadikoProgramAggregateToArchiveTimeFree30
-from radikopodcast.programaggregate.timefree30.segment_discovery import SegmentsDiscovery
-from radikopodcast.programaggregate.timefree30.segment_discovery import get_segment_datetimes
-from radikopodcast.programaggregate.timefree30.segment_downloader import SegmentsDownloader
 from radikopodcast.radiko_datetime import JST
 
 if TYPE_CHECKING:
