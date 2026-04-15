@@ -18,7 +18,8 @@ from radikopodcast.radiko_datetime import RadikoDatetime
 if TYPE_CHECKING:
     import anyio
 
-    from radikopodcast.programaggregate.timefree30.segment_directory import SegmentDirectory
+    from radikopodcast.programaggregate.segment.directory import SegmentDirectory
+    from radikopodcast.programaggregate.segment.discovery import MasterPlaylistRequestFactory
 
 _MAX_WORKERS = 3
 _SEGMENT_DURATION_SECONDS = 5
@@ -27,11 +28,19 @@ _SEGMENT_DURATION_SECONDS = 5
 class SegmentsDownloader:
     """Downloads segments in parallel using ffmpeg and ProcessTaskPoolExecutor."""
 
-    def __init__(self, station_id: str, area_id: str, radiko_session: str, segment_dir: SegmentDirectory) -> None:
+    def __init__(  # pylint: disable=too-many-arguments, too-many-positional-arguments
+        self,
+        station_id: str,
+        area_id: str,
+        radiko_session: str,
+        segment_dir: SegmentDirectory,
+        request_factory: MasterPlaylistRequestFactory = TimeFree30DayMasterPlaylistRequest,
+    ) -> None:
         self.station_id = station_id
         self.area_id = area_id
         self.radiko_session = radiko_session
         self.segment_dir = segment_dir
+        self.request_factory = request_factory
         self.logger = getLogger(__name__)
 
     async def download(self, segment_dts: list[datetime]) -> anyio.Path:
@@ -44,7 +53,7 @@ class SegmentsDownloader:
         """Downloads one 5-second segment as an .m4a file into segment_dir."""
         start_at = int(segment_dt.strftime(RadikoDatetime.FORMAT_CODE))
         end_at = int((segment_dt + timedelta(seconds=4)).strftime(RadikoDatetime.FORMAT_CODE))
-        master_playlist_request = TimeFree30DayMasterPlaylistRequest(self.station_id, start_at, end_at)
+        master_playlist_request = self.request_factory(self.station_id, start_at, end_at)
         master_playlist = MasterPlaylistClient.get(
             master_playlist_request,
             area_id=self.area_id,

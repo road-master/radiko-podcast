@@ -1,9 +1,10 @@
-"""Radiko segment discovery via the 30-day time-free endpoint."""
+"""Radiko segment discovery via the time-free endpoint."""
 
 from __future__ import annotations
 
 import asyncio
 import re
+from collections.abc import Callable
 from datetime import datetime
 from datetime import timedelta
 from logging import getLogger
@@ -13,6 +14,7 @@ import aiohttp
 from asynccpu import ProcessTaskPoolExecutor
 from radikoplaylist import MasterPlaylistClient
 from radikoplaylist import TimeFree30DayMasterPlaylistRequest
+from radikoplaylist.master_playlist_request import MasterPlaylistRequest
 
 from radikopodcast.radiko_datetime import JST
 from radikopodcast.radiko_datetime import RadikoDatetime
@@ -23,6 +25,8 @@ if TYPE_CHECKING:
     from radikoplaylist.master_playlist import MasterPlaylist
 
     from radikopodcast.database.models import Program
+
+MasterPlaylistRequestFactory = Callable[[str, int, int], MasterPlaylistRequest]
 
 _INTERVAL_SECONDS = 5
 _MAX_WORKERS = 3
@@ -61,27 +65,36 @@ async def fetch_media_playlist_text(master_playlist: MasterPlaylist) -> MediaPla
         return MediaPlaylistText(await response.text())
 
 
-async def get_segment_datetimes(
+# Reason: Top-level function required for pickling in ProcessTaskPoolExecutor; all context must be explicit args.
+async def get_segment_datetimes(  # noqa: PLR0913 pylint: disable=too-many-arguments, too-many-positional-arguments
     station_id: str,
     start_at: int,
     end_at: int,
     area_id: str,
     radiko_session: str,
+    request_factory: MasterPlaylistRequestFactory,
 ) -> list[datetime]:
     """Fetches media playlist and returns the segment datetimes parsed from AAC URLs."""
-    master_playlist_request = TimeFree30DayMasterPlaylistRequest(station_id, start_at, end_at)
+    master_playlist_request = request_factory(station_id, start_at, end_at)
     master_playlist = MasterPlaylistClient.get(master_playlist_request, area_id=area_id, radiko_session=radiko_session)
     text = await fetch_media_playlist_text(master_playlist)
     return text.analyze_segment_datetimes()
 
 
 class SegmentsDiscovery:
-    """Discovers all segment datetimes for a program via the 30-day time-free endpoint."""
+    """Discovers all segment datetimes for a program via the time-free endpoint."""
 
-    def __init__(self, program: Program, area_id: str, radiko_session: str) -> None:
+    def __init__(
+        self,
+        program: Program,
+        area_id: str,
+        radiko_session: str,
+        request_factory: MasterPlaylistRequestFactory = TimeFree30DayMasterPlaylistRequest,
+    ) -> None:
         self.program = program
         self.area_id = area_id
         self.radiko_session = radiko_session
+        self.request_factory = request_factory
         self.logger = getLogger(__name__)
 
     async def discover_all_segments(self) -> list[datetime]:
@@ -113,6 +126,7 @@ class SegmentsDiscovery:
                     int(end.strftime(RadikoDatetime.FORMAT_CODE)),
                     self.area_id,
                     self.radiko_session,
+                    self.request_factory,
                 )
                 for start, end in chunks
             }
