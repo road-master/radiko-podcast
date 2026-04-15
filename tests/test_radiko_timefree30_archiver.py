@@ -11,6 +11,7 @@ from unittest.mock import MagicMock
 
 import anyio
 import pytest
+from radikoplaylist import TimeFree30DayMasterPlaylistRequest
 
 from radikopodcast.output_directory import OutputDirectory
 from radikopodcast.programaggregate.timefree30 import RadikoProgramAggregateToArchiveTimeFree30
@@ -51,7 +52,7 @@ def mock_aiohttp_session(mocker: MockFixture) -> MagicMock:
     mock_session.__aenter__ = AsyncMock(return_value=mock_session)
     mock_session.__aexit__ = AsyncMock(return_value=False)
     return mocker.patch(
-        "radikopodcast.programaggregate.timefree30.segment_discovery.aiohttp.ClientSession",
+        "radikopodcast.programaggregate.segment.discovery.aiohttp.ClientSession",
         return_value=mock_session,
     )
 
@@ -63,7 +64,14 @@ class TestGetSegmentDatetimes:
     @pytest.mark.usefixtures("mock_master_playlist_client", "mock_aiohttp_session")
     async def test(self) -> None:
         """Should parse segment datetimes from AAC URL filenames."""
-        result = await get_segment_datetimes("FMJ", 20210116050000, 20210116050010, "JP13", "session_token")
+        result = await get_segment_datetimes(
+            "FMJ",
+            20210116050000,
+            20210116050010,
+            "JP13",
+            "session_token",
+            TimeFree30DayMasterPlaylistRequest,
+        )
         assert result == [
             datetime(2021, 1, 16, 5, 0, 0, tzinfo=JST),
             datetime(2021, 1, 16, 5, 0, 5, tzinfo=JST),
@@ -91,10 +99,17 @@ class TestGetSegmentDatetimes:
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=False)
         mocker.patch(
-            "radikopodcast.programaggregate.timefree30.segment_discovery.aiohttp.ClientSession",
+            "radikopodcast.programaggregate.segment.discovery.aiohttp.ClientSession",
             return_value=mock_session,
         )
-        result = await get_segment_datetimes("FMJ", 20210116050000, 20210116050005, "JP13", "session_token")
+        result = await get_segment_datetimes(
+            "FMJ",
+            20210116050000,
+            20210116050005,
+            "JP13",
+            "session_token",
+            TimeFree30DayMasterPlaylistRequest,
+        )
         assert result == [datetime(2021, 1, 16, 5, 0, 0, tzinfo=JST)]
 
 
@@ -122,7 +137,7 @@ class TestRadikoProgramAggregateToArchiveTimeFree30:
             new=AsyncMock(return_value=anyio.Path(tmp_path / "input.txt")),
         )
         mock_ffmpeg_run = mocker.patch(
-            "radikopodcast.programaggregate.timefree30.ffmpeg.run",
+            "radikopodcast.programaggregate.slowapi.ffmpeg.run",
         )
 
         await RadikoProgramAggregateToArchiveTimeFree30(model_program, OutputDirectory(), "session_token").archive()

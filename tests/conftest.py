@@ -203,7 +203,7 @@ def _mock_requests_program_week(resource_path_root: Path, requests_mock: Mocker,
 def mock_master_playlist_client(mocker: MockFixture) -> MagicMock:
     """Mock MasterPlaylistClient.get()."""
     master_playlist = MasterPlaylist(
-        "",
+        "https://radiko.jp/v2/api/ts/playlist.m3u8",
         {
             "Accept": "*/*",
             "Connection": "keep-alive",

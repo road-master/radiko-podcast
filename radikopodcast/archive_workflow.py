@@ -7,6 +7,8 @@ import os
 from logging import getLogger
 from typing import TYPE_CHECKING
 
+from radikoplaylist.exceptions import BadHttpStatusCodeError
+
 if TYPE_CHECKING:
     from radikopodcast.database.models import Program
     from radikopodcast.programaggregate.factory import RadikoProgramAggregateToArchiveFactory
@@ -47,6 +49,14 @@ class RadikoArchiveWorkflow:
         except FileExistsError:
             if self.stop_if_file_exists:
                 raise
+            program.mark_failed()
+            return
+        except BadHttpStatusCodeError:
+            self.logger.warning(
+                "HTTP error archiving %s %s — station may not support this time-free type; marking failed.",
+                program.station_id,
+                program.ft_string,
+            )
             program.mark_failed()
             return
         program.mark_archived()
