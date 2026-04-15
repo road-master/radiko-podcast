@@ -13,3 +13,9 @@ keywords:
   - "K's Transmission"
   - "ROPPONGI PASSION PIT"
   - "カフェイン11"
+# タイムフリー30 プランに加入したアカウントでログインした際の radiko_session を設定すると、
+# 30 日まで遡ってアーカイブできます
+# この値は開発者ツールの Network タブを開き、
+# ログインした radiko で画面遷移した際のリクエストをクリック、
+# Headers タブで Request Headers の Cookie を参照するなどして確認できます
+radiko_session: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
