@@ -13,5 +13,5 @@ from radikopodcast.config import Config
 # Reason: To follow the official documentation of SQLAlchemy:
 # - Session Basics — SQLAlchemy 2.0 Documentation
 #   https://docs.sqlalchemy.org/en/20/orm/session_basics.html
-Session = scoped_session(sessionmaker(bind=create_engine("sqlite://")))  # pylint: disable=invalid-name
+Session = scoped_session(sessionmaker(bind=create_engine("sqlite:///programs.db")))  # pylint: disable=invalid-name
 CONFIG: Config = Config()
