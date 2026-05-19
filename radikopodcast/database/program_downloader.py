@@ -8,6 +8,8 @@ from datetime import timedelta
 from logging import getLogger
 from typing import TYPE_CHECKING
 
+from radikoplaylist.exceptions import HttpRequestError
+
 from radikopodcast.database.models import Program
 from radikopodcast.radiko_datetime import RadikoDatetime
 from radikopodcast.radikoapi.radiko_api import RadikoApi
@@ -42,8 +44,11 @@ class ProgramDownloader:
         for target_date in self.daterange(self.time_free_oldest_date, self.time_free_day_before_newest_date):
             self.logger.debug("target_date = %04d-%02d-%02d", target_date.year, target_date.month, target_date.day)
             if Program.is_empty(target_date):
-                element_tree_radiko = RadikoApi(area_id=self.area_id).get_program(target_date)
-                Program.save_all(XmlConverterProgram(target_date, element_tree_radiko, self.area_id).to_model())
+                try:
+                    element_tree_radiko = RadikoApi(area_id=self.area_id).get_program(target_date)
+                    Program.save_all(XmlConverterProgram(target_date, element_tree_radiko, self.area_id).to_model())
+                except HttpRequestError:
+                    self.logger.exception("Failed to fetch/save programs for %s; will retry next cycle", target_date)
 
     @staticmethod
     def daterange(start_date: date, end_date: date) -> Generator[date, None, None]:
