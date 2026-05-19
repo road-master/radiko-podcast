@@ -2,7 +2,7 @@
 
 __author__ = """Master"""
 __email__ = "roadmasternavi@gmail.com"
-__version__ = "1.2.1"
+__version__ = "1.3.0"
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session
