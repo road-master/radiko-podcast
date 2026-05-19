@@ -51,8 +51,12 @@ class MediaPlaylistText:
         return [datetime.strptime(m.group(1), "%Y%m%d_%H%M%S").replace(tzinfo=JST) for m in matches]
 
 
+# Reason: docformatter's bug:
+# - The docformatter removes blank line against PEP8 (conflicts with Ruff (Black)) · Issue #350 · PyCQA/docformatter
+#   https://github.com/PyCQA/docformatter/issues/350
 async def fetch_media_playlist_text(master_playlist: MasterPlaylist) -> MediaPlaylistText:
-    """Fetches media playlist text from the URL in master_playlist using aiohttp."""
+    """Fetches media playlist text from the URL in master_playlist using aiohttp."""  # noqa: D202
+
     async with (
         aiohttp.ClientSession() as session,
         session.get(
