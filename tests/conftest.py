@@ -9,6 +9,7 @@ from datetime import date
 from datetime import datetime
 from pathlib import Path
 from shutil import copyfile
+from textwrap import dedent
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
 from unittest.mock import MagicMock
@@ -83,12 +84,16 @@ def xml_station(resource_path_root: Path) -> str:
     return (resource_path_root / "station.xml").read_text(encoding="utf-8")
 
 
+XML_STATION_NAME_LACKED = dedent("""\
+    <stations area_id="JP13" area_name="TOKYO JAPAN">
+    <station><id>TBS</id></station>
+    </stations>
+""")
+
+
 @pytest.fixture
 def xml_station_name_lacked() -> str:
-    return """\
-<stations area_id="JP13" area_name="TOKYO JAPAN">
-<station><id>TBS</id></station>
-</stations>"""
+    return XML_STATION_NAME_LACKED
 
 
 @pytest.fixture
