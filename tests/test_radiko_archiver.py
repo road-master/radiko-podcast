@@ -7,6 +7,8 @@ from unittest.mock import AsyncMock
 import pytest
 from asynccpu.process_task_pool_executor import ProcessTaskPoolExecutor
 from pytest_mock import MockFixture
+from radikoplaylist.exceptions import NoAvailableUrlError
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from radikopodcast.archive_workflow import RadikoArchiveWorkflow
 from radikopodcast.database.models import Program
@@ -71,3 +73,27 @@ class TestRadikoArchiver:
         await radiko_archive_workflow.execute(program)
         mock_archive.assert_called_once()
         assert radiko_archive_workflow.radiko_program_aggregate_factory.radiko_session == "session_token"
+
+    @pytest.mark.asyncio
+    @pytest.mark.usefixtures("record_program")
+    async def test_no_available_url_skip(self, mocker: MockFixture) -> None:
+        """NoAvailableUrlError should mark program as failed without raising."""
+        mocker.patch.object(
+            RadikoProgramAggregateToArchiveFactory,
+            "create",
+            side_effect=NoAvailableUrlError([]),
+        )
+        program = Program.find(["ROPPONGI PASSION PIT"])[0]
+        await RadikoArchiveWorkflow(RadikoProgramAggregateToArchiveFactory(OutputDirectory())).execute(program)
+
+    @pytest.mark.asyncio
+    @pytest.mark.usefixtures("record_program")
+    async def test_connection_error_skip(self, mocker: MockFixture) -> None:
+        """RequestsConnectionError should mark program as failed without raising."""
+        mocker.patch.object(
+            RadikoProgramAggregateToArchiveFactory,
+            "create",
+            side_effect=RequestsConnectionError(),
+        )
+        program = Program.find(["ROPPONGI PASSION PIT"])[0]
+        await RadikoArchiveWorkflow(RadikoProgramAggregateToArchiveFactory(OutputDirectory())).execute(program)
