@@ -8,10 +8,20 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 
 from radikoplaylist.exceptions import BadHttpStatusCodeError
+from radikoplaylist.exceptions import NoAvailableUrlError
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 if TYPE_CHECKING:
     from radikopodcast.database.models import Program
     from radikopodcast.programaggregate.factory import RadikoProgramAggregateToArchiveFactory
+
+_ARCHIVE_ERROR_MESSAGES: dict[type[Exception], str] = {
+    BadHttpStatusCodeError: (
+        "HTTP error archiving %s %s — station may not support this time-free type; marking failed."
+    ),
+    NoAvailableUrlError: "No available playlist URL for %s %s — URL may be unsupported; marking failed.",
+    RequestsConnectionError: "Connection error archiving %s %s — Radiko API unreachable; marking failed.",
+}
 
 
 class RadikoArchiveWorkflow:
@@ -37,8 +47,20 @@ class RadikoArchiveWorkflow:
             program.ft,
             program.to,
         )
+        program.mark_archiving()
         try:
-            program.mark_archiving()
+            await self._try_archive(program)
+        except FileExistsError:
+            if self.stop_if_file_exists:
+                raise
+            program.mark_failed()
+            return
+        except (BadHttpStatusCodeError, NoAvailableUrlError, RequestsConnectionError):
+            return
+        program.mark_archived()
+
+    async def _try_archive(self, program: Program) -> None:
+        try:
             radiko_program_aggregate = self.radiko_program_aggregate_factory.create(program)
             await radiko_program_aggregate.archive()
         except (KeyboardInterrupt, asyncio.CancelledError):
@@ -46,17 +68,11 @@ class RadikoArchiveWorkflow:
             self.logger.debug("FFmpeg run cancelled.")
             program.mark_suspended()
             raise
-        except FileExistsError:
-            if self.stop_if_file_exists:
-                raise
-            program.mark_failed()
-            return
-        except BadHttpStatusCodeError:
+        except (BadHttpStatusCodeError, NoAvailableUrlError, RequestsConnectionError) as error:
             self.logger.warning(
-                "HTTP error archiving %s %s — station may not support this time-free type; marking failed.",
+                _ARCHIVE_ERROR_MESSAGES[type(error)],
                 program.station_id,
                 program.ft_string,
             )
             program.mark_failed()
-            return
-        program.mark_archived()
+            raise
