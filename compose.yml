@@ -4,6 +4,7 @@ services:
       context: .
     image: mstmelody/radiko-podcast:development
     volumes:
+      - ~/.claude:/root/.claude:cached
       - ./config.yml:/workspace/config.yml
       - ./output:/workspace/output
       # - Using uv in Docker | uv
