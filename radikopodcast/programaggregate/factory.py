@@ -51,7 +51,7 @@ class RadikoProgramAggregateToArchiveFactory:
         )
 
     def _is_fast_api(self, program: Program) -> bool:
-        """Returns True if the station's playlist URL is served from https://radiko.jp (fast CDN).
+        """Return True if the station's playlist URL is served from https://radiko.jp (fast CDN).
 
         Uses MasterPlaylistClient.get() so tests can mock at the same level as the rest of the
         archiving pipeline.

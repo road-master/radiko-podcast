@@ -38,7 +38,7 @@ class RadikoArchiveWorkflow:
         self.stop_if_file_exists = stop_if_file_exists
 
     async def execute(self, program: Program) -> None:
-        """Archives radiko program."""
+        """Archive radiko program."""
         self.logger.debug("Start archive")
         self.logger.debug(
             "program time: %s, station: %s, start: %s, end: %s",

@@ -20,6 +20,6 @@ class Database:
 
     @staticmethod
     def initialize_database() -> None:
-        """This function create empty tables from SQLAlchemy models."""
+        """Create empty tables from SQLAlchemy models."""
         # pylint: disable=no-member
         Base.metadata.create_all(Session.get_bind(), checkfirst=False)

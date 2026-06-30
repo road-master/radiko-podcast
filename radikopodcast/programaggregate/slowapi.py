@@ -39,7 +39,7 @@ class RadikoProgramAggregateToArchiveSlowApi(RadikoProgramAggregateToArchive):
         self.request_factory = request_factory
 
     async def archive(self) -> None:
-        """Archives a program via segment-by-segment download and ffmpeg concatenation."""
+        """Archive a program via segment-by-segment download and ffmpeg concatenation."""
         out_file = await self.output_directory.get_output_file_path(self.program)
         area_id = self.program.area_id
         if not area_id:

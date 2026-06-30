@@ -52,7 +52,7 @@ class ProgramSchedule:
         )
 
     def add(self, now: datetime) -> None:
-        """Adds programs from radiko API."""
+        """Add programs from radiko API."""
         program_downloader = ProgramDownloader(now, area_id=self.area_id, radiko_session=self.radiko_session)
         program_downloader.download_all_time_free_programs()
 

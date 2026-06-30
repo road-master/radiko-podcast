@@ -38,7 +38,7 @@ class XmlParser:
         return bool(self.list_error)
 
     def stock_error(self, method: Callable[[], T], message: str) -> T | None:
-        """This method stocks error."""
+        """Collect any XmlParseError raised by method into list_error."""
         with MultipleErrorCollector(XmlParseError, message, self.list_error):
             return method()
         return None

@@ -53,7 +53,7 @@ class RadikoPodcast:
         self.logger = logging.getLogger(__name__)
 
     def run(self) -> None:
-        """Runs."""
+        """Run the podcast archiver."""
         try:
             asyncio.run(self.archive_repeatedly())
         except Exception:
@@ -61,7 +61,7 @@ class RadikoPodcast:
             raise
 
     async def archive_repeatedly(self) -> None:
-        """Archives repeatedly."""
+        """Archive programs repeatedly on a schedule."""
         with ProcessTaskPoolExecutor(
             max_workers=CONFIG.number_process,
             cancel_tasks_when_shutdown=True,

@@ -84,7 +84,7 @@ class ModelInitByXml(Base, Generic[TypeVarXmlParser]):
 
     @classmethod
     def save_all(cls, models: Iterable[TypeVarModelInitByXml]) -> None:
-        """This method insert Store models into database."""
+        """Insert all models into the database."""
         with SessionManager() as session, session.begin():
             session.add_all(models)
 
@@ -113,7 +113,7 @@ class Station(ModelInitByXml[XmlParserStation]):
 
     @staticmethod
     def is_empty() -> bool:
-        """Returns whether the station table is empty."""
+        """Return whether the station table is empty."""
         with SessionManager() as session:
             # Reason: Pylint's bug:
             # - `not-callable` false positive for class · Issue #8138 · pylint-dev/pylint
@@ -201,7 +201,7 @@ class Program(ModelInitByXml[XmlParserProgram]):
 
     @staticmethod
     def find(keywords: list[str]) -> list[Program]:
-        """This method select Store model from database."""
+        """Select programs from the database matching keywords."""
         with SessionManager() as session:
             list_condition_keyword = [Program.title.like(f"%{keyword}%") for keyword in keywords]
             return (
@@ -219,7 +219,7 @@ class Program(ModelInitByXml[XmlParserProgram]):
             session.query(Program).filter(Program.date < boundary_date).delete()
 
     def is_timefree30_required(self) -> bool:
-        """Returns whether the program requires time-free 30-day download."""
+        """Return whether the program requires time-free 30-day download."""
         if not self.ft:
             message = f"{self.ft=}"
             raise ValueError(message)
