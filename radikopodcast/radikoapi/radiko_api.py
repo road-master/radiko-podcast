@@ -34,5 +34,4 @@ class RadikoApi:
 
     @staticmethod
     def get(url: str) -> "Element":
-        # Reason: The defusedxml's responsible.
-        return ElementTree.fromstring(Requester.get(url).content, forbid_dtd=True)  # type: ignore[no-any-return]
+        return ElementTree.fromstring(Requester.get(url).content, forbid_dtd=True)

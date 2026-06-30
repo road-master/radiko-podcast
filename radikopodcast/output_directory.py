@@ -18,7 +18,7 @@ class OutputDirectory:
         self.path.mkdir(exist_ok=True)
 
     async def get_output_file_path(self, program: Program) -> anyio.Path:
-        """Returns output file path for the given program."""
+        """Return output file path for the given program."""
         file_name = f"{self.build_file_stem(program)}.m4a"
         output_file_path = anyio.Path(self.path) / file_name
         self.logger.debug("out file name: %s", output_file_path)
@@ -30,5 +30,5 @@ class OutputDirectory:
 
     @staticmethod
     def build_file_stem(program: Program) -> str:
-        """Builds file stem for the given program."""
+        """Build file stem for the given program."""
         return f"{program.ft_string}_{program.station_id}_{sanitize_filename(str(program.title))}"

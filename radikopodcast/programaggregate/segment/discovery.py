@@ -41,12 +41,12 @@ class MediaPlaylistText:
         self.string = string
 
     def analyze_urls(self) -> Generator[str]:
-        """Parses segment datetimes from AAC URLs in media playlist text."""
+        """Parse AAC URLs in the media playlist and yield non-comment lines."""
         lines = (line.strip() for line in self.string.splitlines())
         return (line for line in lines if line and not line.startswith("#"))
 
     def analyze_segment_datetimes(self) -> list[datetime]:
-        """Parses segment datetimes from AAC URLs in media playlist text."""
+        """Parse segment datetimes from AAC URLs in the media playlist text."""
         matches = (match for url in self.analyze_urls() if (match := self.AAC_SEGMENT_PATTERN.search(url)))
         return [datetime.strptime(m.group(1), "%Y%m%d_%H%M%S").replace(tzinfo=JST) for m in matches]
 
@@ -55,7 +55,7 @@ class MediaPlaylistText:
 # - The docformatter removes blank line against PEP8 (conflicts with Ruff (Black)) · Issue #350 · PyCQA/docformatter
 #   https://github.com/PyCQA/docformatter/issues/350
 async def fetch_media_playlist_text(master_playlist: MasterPlaylist) -> MediaPlaylistText:
-    """Fetches media playlist text from the URL in master_playlist using aiohttp."""  # noqa: D202
+    """Fetch media playlist text from the URL in master_playlist using aiohttp."""  # noqa: D202
 
     async with (
         aiohttp.ClientSession() as session,
@@ -78,7 +78,7 @@ async def get_segment_datetimes(  # noqa: PLR0913 pylint: disable=too-many-argum
     radiko_session: str,
     request_factory: MasterPlaylistRequestFactory,
 ) -> list[datetime]:
-    """Fetches media playlist and returns the segment datetimes parsed from AAC URLs."""
+    """Fetch media playlist and return the segment datetimes parsed from AAC URLs."""
     master_playlist_request = request_factory(station_id, start_at, end_at)
     master_playlist = MasterPlaylistClient.get(master_playlist_request, area_id=area_id, radiko_session=radiko_session)
     text = await fetch_media_playlist_text(master_playlist)
@@ -106,7 +106,7 @@ class SegmentsDiscovery:
         return sorted({dt for result in results for dt in result})
 
     def create_chunks(self) -> list[tuple[datetime, datetime]]:
-        """Creates chunks of the program's time range to query for segments in parallel."""
+        """Create chunks of the program's time range to query for segments in parallel."""
         dt_start = datetime.strptime(self.program.ft_string, RadikoDatetime.FORMAT_CODE).replace(tzinfo=JST)
         dt_end = datetime.strptime(self.program.to_string, RadikoDatetime.FORMAT_CODE).replace(tzinfo=JST)
         chunk = timedelta(seconds=_INTERVAL_SECONDS)
@@ -119,7 +119,7 @@ class SegmentsDiscovery:
         return chunks
 
     async def gather_segment_datetimes(self) -> list[list[datetime]]:
-        """Fetches segment datetimes for all chunks in parallel using ProcessTaskPoolExecutor."""
+        """Fetch segment datetimes for all chunks in parallel using ProcessTaskPoolExecutor."""
         chunks = self.create_chunks()
         with ProcessTaskPoolExecutor(max_workers=_MAX_WORKERS, cancel_tasks_when_shutdown=True) as executor:
             awaitables = {

@@ -28,7 +28,7 @@ class RadikoStreamSpecFactory:
         self.logger = getLogger(__name__)
 
     async def create(self) -> "StreamSpec":
-        """Creates."""
+        """Create and return the FFmpeg StreamSpec for this program."""
         master_playlist_request = TimeFreeMasterPlaylistRequest(
             self.program.station_id,
             int(self.program.ft_string),

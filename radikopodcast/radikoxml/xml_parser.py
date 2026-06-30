@@ -38,15 +38,14 @@ class XmlParser:
         return bool(self.list_error)
 
     def stock_error(self, method: Callable[[], T], message: str) -> T | None:
-        """This method stocks error."""
+        """Collect any XmlParseError raised by method into list_error."""
         with MultipleErrorCollector(XmlParseError, message, self.list_error):
             return method()
         return None
 
     @staticmethod
     def to_string(element: Element) -> str:
-        # Reason: The defusedxml's responsible.
-        return ElementTree.tostring(element, encoding="unicode")  # type: ignore[no-any-return]
+        return ElementTree.tostring(element, encoding="unicode")
 
 
 # Reason: This class converts argument of constructor to property. pylint: disable=too-few-public-methods

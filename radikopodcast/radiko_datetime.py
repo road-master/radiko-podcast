@@ -44,7 +44,7 @@ class RadikoDatetime:
 
     @staticmethod
     def is_timefree30_required(program_ft: datetime) -> bool:
-        """Returns whether the program is available without time-free 30-day download."""
+        """Return whether the program requires time-free 30-day download."""
         time_free_oldest_date = RadikoDatetime.time_free_oldest_date(RadikoDatetime.now_jst())
         radiko_date_of_program_ft = RadikoDate.radiko_date(program_ft)
         return radiko_date_of_program_ft < time_free_oldest_date
@@ -65,7 +65,7 @@ class RadikoDate:
 
     @staticmethod
     def radiko_date(date_time: datetime) -> date:
-        """Returns the date of the program ft belongs to."""
+        """Return the radiko date that program_ft belongs to."""
         if date_time.hour < HOUR_BORDER_OF_RADIKO_DATE:
             return (date_time - timedelta(days=1)).date()
         return date_time.date()

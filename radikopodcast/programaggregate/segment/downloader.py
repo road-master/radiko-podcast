@@ -50,7 +50,7 @@ class SegmentsDownloader:
         return await self.segment_dir.create_segment_list_file()
 
     async def download_segment(self, segment_dt: datetime) -> None:
-        """Downloads one 5-second segment as an .m4a file into segment_dir."""
+        """Download one 5-second segment as an .m4a file into segment_dir."""
         start_at = int(segment_dt.strftime(RadikoDatetime.FORMAT_CODE))
         end_at = int((segment_dt + timedelta(seconds=4)).strftime(RadikoDatetime.FORMAT_CODE))
         master_playlist_request = self.request_factory(self.station_id, start_at, end_at)

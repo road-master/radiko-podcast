@@ -259,15 +259,13 @@ def _mock_requests_station(requests_mock: Mocker, xml_station: str) -> None:
 @pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
 def element_tree_program(xml_program: str) -> Element:
-    # Reason: The defusedxml's responsible.
-    return ElementTree.fromstring(xml_program, forbid_dtd=True)  # type: ignore[no-any-return]
+    return ElementTree.fromstring(xml_program, forbid_dtd=True)
 
 
 @pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
 def element_tree_station(xml_station: str) -> Element:
-    # Reason: The defusedxml's responsible.
-    return ElementTree.fromstring(xml_station, forbid_dtd=True)  # type: ignore[no-any-return]
+    return ElementTree.fromstring(xml_station, forbid_dtd=True)
 
 
 @pytest.fixture
@@ -285,13 +283,13 @@ def model_program_area_id_none(element_tree_program: Element) -> Program:
 
 @pytest.fixture
 def database_session() -> Generator[SQLAlchemySession, None, None]:
-    """This fixture prepares database and fixture records."""
+    """Prepare database and fixture records."""
     yield from DatabaseForTest.database_session()
 
 
 @pytest.fixture
 def database_session_with_schema() -> Generator[SQLAlchemySession, None, None]:
-    """This fixture prepares database session and fixture records to reset database after each test."""
+    """Prepare database session and fixture records; reset database after each test."""
     yield from DatabaseForTest.database_session_with_schema()
 
 
@@ -301,7 +299,7 @@ def record_program(
     database_session_with_schema: SQLAlchemySession,
     element_tree_program: Element,
 ) -> SQLAlchemySession:
-    """This fixture prepares database session and fixture records to reset database after each test."""
+    """Prepare database session and fixture records; reset database after each test."""
     Program.save_all(XmlConverterProgram(date(2021, 1, 16), element_tree_program, "JP13").to_model())
     database_session_with_schema.flush()
     return database_session_with_schema

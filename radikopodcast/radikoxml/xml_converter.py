@@ -31,7 +31,7 @@ class XmlConverter(Generic[T]):
         self.logger = getLogger(__name__)
 
     def to_model(self) -> list[T]:
-        """Converts to list of SQLAlchemy model of station of radiko."""
+        """Convert XML data to a list of SQLAlchemy models."""
         list_model = list(filter(lambda x: x is not None, self.comprehension_notation()))
         self.logger.debug(list_model)
         # Reason: mypy's bug, see: https://github.com/python/mypy/issues/6847

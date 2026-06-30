@@ -17,13 +17,13 @@ class DatabaseForTest:
 
     @classmethod
     def database_session(cls) -> "Generator[SQLAlchemySession, None, None]":
-        """This fixture prepares database session to reset database after each test."""
+        """Prepare database session and reset database after each test."""
         with DatabaseEngineManager(Session):
             yield Session()
 
     @classmethod
     def database_session_with_schema(cls) -> "Generator[SQLAlchemySession, None, None]":
-        """This fixture prepares database session and fixture records to reset database after each test."""
+        """Prepare database session and fixture records; reset database after each test."""
         with DatabaseEngineManager(Session) as engine:
             session = Session()
             Base.metadata.create_all(engine, checkfirst=False)
