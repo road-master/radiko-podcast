@@ -30,5 +30,4 @@ class TestRadikoApi:
 
     @staticmethod
     def to_string(element_tree: "Element") -> str:
-        # Reason: The defusedxml's responsible.
-        return ElementTree.tostring(element_tree, encoding="unicode")  # type: ignore[no-any-return]
+        return ElementTree.tostring(element_tree, encoding="unicode")

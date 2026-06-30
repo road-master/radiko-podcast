@@ -259,15 +259,13 @@ def _mock_requests_station(requests_mock: Mocker, xml_station: str) -> None:
 @pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
 def element_tree_program(xml_program: str) -> Element:
-    # Reason: The defusedxml's responsible.
-    return ElementTree.fromstring(xml_program, forbid_dtd=True)  # type: ignore[no-any-return]
+    return ElementTree.fromstring(xml_program, forbid_dtd=True)
 
 
 @pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
 def element_tree_station(xml_station: str) -> Element:
-    # Reason: The defusedxml's responsible.
-    return ElementTree.fromstring(xml_station, forbid_dtd=True)  # type: ignore[no-any-return]
+    return ElementTree.fromstring(xml_station, forbid_dtd=True)
 
 
 @pytest.fixture

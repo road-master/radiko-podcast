@@ -45,8 +45,7 @@ class XmlParser:
 
     @staticmethod
     def to_string(element: Element) -> str:
-        # Reason: The defusedxml's responsible.
-        return ElementTree.tostring(element, encoding="unicode")  # type: ignore[no-any-return]
+        return ElementTree.tostring(element, encoding="unicode")
 
 
 # Reason: This class converts argument of constructor to property. pylint: disable=too-few-public-methods
