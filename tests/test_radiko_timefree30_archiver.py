@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime
+from datetime import timedelta
 from textwrap import dedent
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
@@ -12,7 +13,9 @@ from unittest.mock import MagicMock
 
 import anyio
 import pytest
+from asynccpu import ProcessTaskPoolExecutor
 from radikoplaylist import TimeFree30DayMasterPlaylistRequest
+from radikoplaylist.exceptions import NoAvailableUrlError
 
 from radikopodcast.output_directory import OutputDirectory
 from radikopodcast.programaggregate.segment.discovery import SegmentsDiscovery
@@ -36,6 +39,32 @@ _PLAYLIST_TEXT = dedent("""\
     https://example.com/20210116_050005_FMJ_001.aac
     #EXT-X-ENDLIST
 """)
+
+
+class TestSegmentsDiscoveryGatherSegmentDatetimes:
+    """Tests for SegmentsDiscovery.gather_segment_datetimes() when every chunk fails.
+
+    ``ProcessTaskPoolExecutor.create_process_task`` is mocked because it spawns real OS subprocesses (via forkserver)
+    that do not inherit mocks applied in this process, and would otherwise reach the real radiko servers.
+    """
+
+    @pytest.mark.asyncio
+    async def test_error(self, mocker: MockFixture, model_program: Program) -> None:
+        """Should propagate the first NoAvailableUrlError after consuming every sibling future."""
+        assert model_program.ft is not None
+        model_program.to = model_program.ft + timedelta(seconds=10)
+
+        async def fail_chunk() -> list[datetime]:
+            raise NoAvailableUrlError([])
+
+        mocker.patch.object(
+            ProcessTaskPoolExecutor,
+            "create_process_task",
+            side_effect=lambda *_args, **_kwargs: asyncio.ensure_future(fail_chunk()),
+        )
+        discovery = SegmentsDiscovery(model_program, "JP13", "session_token")
+        with pytest.raises(NoAvailableUrlError):
+            await discovery.gather_segment_datetimes()
 
 
 @pytest.fixture
@@ -80,12 +109,14 @@ class TestGetSegmentDatetimes:
     @pytest.mark.usefixtures("mock_master_playlist_client")
     async def test_ignores_non_aac_lines(self, mocker: MockFixture) -> None:
         """Should skip comment lines and non-AAC URLs."""
-        playlist = dedent("""\
+        playlist = dedent(
+            """\
             #EXTM3U
             #EXT-X-TARGETDURATION:5
             https://example.com/20210116_050000_FMJ_001.aac
             #EXT-X-ENDLIST
-        """)
+        """,
+        )
         mock_response = AsyncMock()
         mock_response.raise_for_status = MagicMock()
         mock_response.text = AsyncMock(return_value=playlist)

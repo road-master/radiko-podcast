@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import re
 from collections.abc import Callable
 from datetime import datetime
@@ -17,6 +16,7 @@ from radikoplaylist import MasterPlaylistClient
 from radikoplaylist import TimeFree30DayMasterPlaylistRequest
 from radikoplaylist.master_playlist_request import MasterPlaylistRequest
 
+from radikopodcast.programaggregate.segment.gather import SiblingConsumingGather
 from radikopodcast.radiko_datetime import JST
 from radikopodcast.radiko_datetime import RadikoDatetime
 
@@ -135,4 +135,4 @@ class SegmentsDiscovery:
                 )
                 for start, end in chunks
             }
-            return await asyncio.gather(*awaitables)
+            return await SiblingConsumingGather(awaitables).run()
