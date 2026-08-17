@@ -12,6 +12,7 @@ from pathlib import Path
 from shutil import copyfile
 from textwrap import dedent
 from typing import TYPE_CHECKING
+from typing import cast
 from unittest.mock import AsyncMock
 from unittest.mock import MagicMock
 
@@ -21,14 +22,18 @@ from click.testing import CliRunner
 from defusedxml import ElementTree
 from jinja2 import Template
 from radikoplaylist.master_playlist_client import MasterPlaylistClient
+from sqlalchemy import and_
+from sqlalchemy import text
 
 from radikopodcast.database.models import Program
+from radikopodcast.database.session_manager import SessionManager
 from radikopodcast.radiko_datetime import JST
 from radikopodcast.radikoxml.xml_converter import XmlConverterProgram
 from tests.test_radiko_stream_spec_factory import MasterPlaylist
 from tests.testlibraries.database_for_test import DatabaseForTest
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from collections.abc import Generator
 
     # Reason: The defusedxml's issue:
@@ -42,6 +47,21 @@ if TYPE_CHECKING:
     from sqlalchemy.orm.session import Session as SQLAlchemySession
 
 collect_ignore = ["setup.py"]
+
+
+@pytest.fixture
+def find_program_by_keyword() -> Callable[[str], Program]:
+    """Look up the first Program whose title contains the given keyword, ordered by ft ascending."""
+
+    def _find(keyword: str) -> Program:
+        with SessionManager() as session:
+            list_condition_keyword = [Program.title.like(f"%{keyword}%")]
+            return cast(
+                "Program",
+                session.query(Program).filter(and_(*list_condition_keyword)).order_by(Program.ft.asc()).first(),
+            )
+
+    return _find
 
 
 @pytest.fixture
@@ -296,6 +316,15 @@ def database_session_with_schema() -> Generator[SQLAlchemySession, None, None]:
 
 @pytest.fixture
 # Reason: To refer other fixture. pylint: disable=redefined-outer-name
+def legacy_database(database_session_with_schema: SQLAlchemySession) -> SQLAlchemySession:
+    """Simulate a pre-upgrade database that lacks the archive_retry_count column."""
+    database_session_with_schema.execute(text("ALTER TABLE programs DROP COLUMN archive_retry_count"))
+    database_session_with_schema.commit()
+    return database_session_with_schema
+
+
+@pytest.fixture
+# Reason: To refer other fixture. pylint: disable=redefined-outer-name
 def record_program(
     database_session_with_schema: SQLAlchemySession,
     element_tree_program: Element,
@@ -304,6 +333,17 @@ def record_program(
     Program.save_all(XmlConverterProgram(date(2021, 1, 16), element_tree_program, "JP13").to_model())
     database_session_with_schema.flush()
     return database_session_with_schema
+
+
+@pytest.fixture
+# Reason: To refer other fixture. pylint: disable=redefined-outer-name
+def record_program_retried(record_program: SQLAlchemySession) -> SQLAlchemySession:
+    """Simulate a fixture program that has already exhausted 4 archive retries."""
+    record_program.query(Program).filter(Program.title.like("%ROPPONGI PASSION PIT%")).update(
+        {Program.archive_retry_count: 4},
+    )
+    record_program.commit()
+    return record_program
 
 
 @pytest.fixture

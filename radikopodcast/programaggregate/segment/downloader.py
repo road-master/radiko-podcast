@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from datetime import datetime
 from datetime import timedelta
 from logging import getLogger
@@ -14,6 +13,7 @@ from asynccpu import ProcessTaskPoolExecutor
 from radikoplaylist import MasterPlaylistClient
 from radikoplaylist import TimeFree30DayMasterPlaylistRequest
 
+from radikopodcast.programaggregate.segment.gather import SiblingConsumingGather
 from radikopodcast.radiko_datetime import RadikoDatetime
 
 if TYPE_CHECKING:
@@ -47,7 +47,7 @@ class SegmentsDownloader:
     async def download(self, segment_dts: list[datetime]) -> anyio.Path:
         with ProcessTaskPoolExecutor(max_workers=_MAX_WORKERS, cancel_tasks_when_shutdown=True) as executor:
             awaitables = [executor.create_process_task(self.download_segment, dt) for dt in segment_dts]
-            await asyncio.gather(*awaitables)
+            await SiblingConsumingGather(awaitables).run()
         return await self.segment_dir.create_segment_list_file()
 
     async def download_segment(self, segment_dt: datetime) -> None:

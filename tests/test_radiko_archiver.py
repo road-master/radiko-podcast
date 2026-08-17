@@ -3,15 +3,19 @@
 
 import asyncio
 import sys
+from collections.abc import Callable
 from unittest.mock import AsyncMock
 
 import pytest
 from asynccpu.process_task_pool_executor import ProcessTaskPoolExecutor
 from pytest_mock import MockFixture
+from radikoplaylist.exceptions import BadHttpStatusCodeError
 from radikoplaylist.exceptions import NoAvailableUrlError
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
+from radikopodcast.archive_workflow import MAX_ARCHIVE_RETRY_COUNT
 from radikopodcast.archive_workflow import RadikoArchiveWorkflow
+from radikopodcast.database.models import ArchiveStatusId
 from radikopodcast.database.models import Program
 from radikopodcast.output_directory import OutputDirectory
 from radikopodcast.programaggregate.factory import RadikoProgramAggregateToArchiveFactory
@@ -75,10 +79,14 @@ class TestRadikoArchiver:
         mock_archive.assert_called_once()
         assert radiko_archive_workflow.radiko_program_aggregate_factory.radiko_session == "session_token"
 
+    @staticmethod
     @pytest.mark.asyncio
     @pytest.mark.usefixtures("record_program")
-    async def test_no_available_url_skip(self, mocker: MockFixture) -> None:
-        """NoAvailableUrlError should mark program as failed without raising."""
+    async def test_no_available_url_skip(
+        mocker: MockFixture,
+        find_program_by_keyword: Callable[[str], Program],
+    ) -> None:
+        """NoAvailableUrlError should mark program as failed without raising, without touching the retry count."""
         mocker.patch.object(
             RadikoProgramAggregateToArchiveFactory,
             "create",
@@ -86,11 +94,41 @@ class TestRadikoArchiver:
         )
         program = Program.find(["ROPPONGI PASSION PIT"])[0]
         await RadikoArchiveWorkflow(RadikoProgramAggregateToArchiveFactory(OutputDirectory())).execute(program)
+        found = find_program_by_keyword("ROPPONGI PASSION PIT")
+        assert found.archive_status == ArchiveStatusId.FAILED.value
+        assert found.archive_retry_count == 0
 
+    @staticmethod
     @pytest.mark.asyncio
     @pytest.mark.usefixtures("record_program")
-    async def test_connection_error_skip(self, mocker: MockFixture) -> None:
-        """RequestsConnectionError should mark program as failed without raising."""
+    async def test_bad_http_status_code_retry(
+        mocker: MockFixture,
+        caplog: pytest.LogCaptureFixture,
+        find_program_by_keyword: Callable[[str], Program],
+    ) -> None:
+        """BadHttpStatusCodeError should requeue the program as archivable without raising."""
+        mocker.patch.object(
+            RadikoProgramAggregateToArchiveFactory,
+            "create",
+            side_effect=BadHttpStatusCodeError("failed in https://example.com/playlist.m3u8."),
+        )
+        program = Program.find(["ROPPONGI PASSION PIT"])[0]
+        await RadikoArchiveWorkflow(RadikoProgramAggregateToArchiveFactory(OutputDirectory())).execute(program)
+        found = find_program_by_keyword("ROPPONGI PASSION PIT")
+        assert found.archive_status == ArchiveStatusId.ARCHIVABLE.value
+        assert found.archive_retry_count == 1
+        assert "attempt 1/5" in caplog.text
+        assert "https://example.com/playlist.m3u8" in caplog.text
+
+    @staticmethod
+    @pytest.mark.asyncio
+    @pytest.mark.usefixtures("record_program")
+    async def test_connection_error_retry(
+        mocker: MockFixture,
+        caplog: pytest.LogCaptureFixture,
+        find_program_by_keyword: Callable[[str], Program],
+    ) -> None:
+        """RequestsConnectionError should requeue the program as archivable without raising."""
         mocker.patch.object(
             RadikoProgramAggregateToArchiveFactory,
             "create",
@@ -98,3 +136,28 @@ class TestRadikoArchiver:
         )
         program = Program.find(["ROPPONGI PASSION PIT"])[0]
         await RadikoArchiveWorkflow(RadikoProgramAggregateToArchiveFactory(OutputDirectory())).execute(program)
+        found = find_program_by_keyword("ROPPONGI PASSION PIT")
+        assert found.archive_status == ArchiveStatusId.ARCHIVABLE.value
+        assert found.archive_retry_count == 1
+        assert "will retry next cycle" in caplog.text
+
+    @staticmethod
+    @pytest.mark.asyncio
+    @pytest.mark.usefixtures("record_program_retried")
+    async def test_retry_exhausted(
+        mocker: MockFixture,
+        caplog: pytest.LogCaptureFixture,
+        find_program_by_keyword: Callable[[str], Program],
+    ) -> None:
+        """Once retries are exhausted, the program should be marked failed with an ERROR log."""
+        mocker.patch.object(
+            RadikoProgramAggregateToArchiveFactory,
+            "create",
+            side_effect=RequestsConnectionError(),
+        )
+        program = Program.find(["ROPPONGI PASSION PIT"])[0]
+        await RadikoArchiveWorkflow(RadikoProgramAggregateToArchiveFactory(OutputDirectory())).execute(program)
+        found = find_program_by_keyword("ROPPONGI PASSION PIT")
+        assert found.archive_status == ArchiveStatusId.FAILED.value
+        assert found.archive_retry_count == MAX_ARCHIVE_RETRY_COUNT
+        assert "Giving up" in caplog.text

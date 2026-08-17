@@ -1,15 +1,15 @@
 # Copyright (C) 2026 Master
 """Test for models.py."""
 
+from collections.abc import Callable
 from datetime import date
-from typing import cast
 
 import pytest
-from sqlalchemy import and_
 
 from radikopodcast.database.models import ArchiveStatusId
 from radikopodcast.database.models import Program
-from radikopodcast.database.session_manager import SessionManager
+
+MAX_RETRY_COUNT = 5
 
 
 class TestProgram:
@@ -36,23 +36,38 @@ class TestProgram:
             model_program.ft_string  # noqa: B018
         assert "None" in str(excinfo.value)
 
+    @staticmethod
     @pytest.mark.usefixtures("record_program")
-    def test_mark_archivable(self) -> None:
+    def test_mark_archivable(find_program_by_keyword: Callable[[str], Program]) -> None:
         """Method: mark_archivable() should update database record as status: archivable."""
-        program = self.find_one("ROPPONGI PASSION PIT")
+        program = find_program_by_keyword("ROPPONGI PASSION PIT")
         assert program.archive_status == ArchiveStatusId.ARCHIVABLE
         program.mark_archiving()
-        program = self.find_one("ROPPONGI PASSION PIT")
+        program = find_program_by_keyword("ROPPONGI PASSION PIT")
         assert program.archive_status == ArchiveStatusId.ARCHIVING
         program.mark_archivable()
-        program = self.find_one("ROPPONGI PASSION PIT")
+        program = find_program_by_keyword("ROPPONGI PASSION PIT")
         assert program.archive_status == ArchiveStatusId.ARCHIVABLE
 
     @staticmethod
-    def find_one(keyword: str) -> Program:
-        with SessionManager() as session:
-            list_condition_keyword = [Program.title.like(f"%{keyword}%")]
-            return cast(
-                "Program",
-                session.query(Program).filter(and_(*list_condition_keyword)).order_by(Program.ft.asc()).first(),
-            )
+    @pytest.mark.usefixtures("record_program")
+    def test_mark_retry_or_failed(find_program_by_keyword: Callable[[str], Program]) -> None:
+        """Method should requeue the program as archivable while retries remain."""
+        program = find_program_by_keyword("ROPPONGI PASSION PIT")
+        assert program.archive_retry_count == 0
+        assert program.mark_retry_or_failed(MAX_RETRY_COUNT) == 1
+        program = find_program_by_keyword("ROPPONGI PASSION PIT")
+        assert program.archive_status == ArchiveStatusId.ARCHIVABLE.value
+        assert program.archive_retry_count == 1
+        assert [found.id for found in Program.find(["ROPPONGI PASSION PIT"])] == [program.id]
+
+    @staticmethod
+    @pytest.mark.usefixtures("record_program")
+    def test_mark_retry_or_failed_exhausted(find_program_by_keyword: Callable[[str], Program]) -> None:
+        """Method should mark the program failed once retries are exhausted."""
+        program = find_program_by_keyword("ROPPONGI PASSION PIT")
+        for _ in range(MAX_RETRY_COUNT - 1):
+            program.mark_retry_or_failed(MAX_RETRY_COUNT)
+        assert program.mark_retry_or_failed(MAX_RETRY_COUNT) == MAX_RETRY_COUNT
+        program = find_program_by_keyword("ROPPONGI PASSION PIT")
+        assert program.archive_status == ArchiveStatusId.FAILED.value
