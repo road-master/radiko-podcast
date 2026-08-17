@@ -21,6 +21,7 @@ from click.testing import CliRunner
 from defusedxml import ElementTree
 from jinja2 import Template
 from radikoplaylist.master_playlist_client import MasterPlaylistClient
+from sqlalchemy import text
 
 from radikopodcast.database.models import Program
 from radikopodcast.radiko_datetime import JST
@@ -292,6 +293,15 @@ def database_session() -> Generator[SQLAlchemySession, None, None]:
 def database_session_with_schema() -> Generator[SQLAlchemySession, None, None]:
     """Prepare database session and fixture records; reset database after each test."""
     yield from DatabaseForTest.database_session_with_schema()
+
+
+@pytest.fixture
+# Reason: To refer other fixture. pylint: disable=redefined-outer-name
+def legacy_database(database_session_with_schema: SQLAlchemySession) -> SQLAlchemySession:
+    """Simulate a pre-upgrade database that lacks the archive_retry_count column."""
+    database_session_with_schema.execute(text("ALTER TABLE programs DROP COLUMN archive_retry_count"))
+    database_session_with_schema.commit()
+    return database_session_with_schema
 
 
 @pytest.fixture

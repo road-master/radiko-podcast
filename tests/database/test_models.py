@@ -11,6 +11,8 @@ from radikopodcast.database.models import ArchiveStatusId
 from radikopodcast.database.models import Program
 from radikopodcast.database.session_manager import SessionManager
 
+MAX_RETRY_COUNT = 5
+
 
 class TestProgram:
     """Test for Program."""
@@ -47,6 +49,27 @@ class TestProgram:
         program.mark_archivable()
         program = self.find_one("ROPPONGI PASSION PIT")
         assert program.archive_status == ArchiveStatusId.ARCHIVABLE
+
+    @pytest.mark.usefixtures("record_program")
+    def test_mark_retry_or_failed(self) -> None:
+        """Method should requeue the program as archivable while retries remain."""
+        program = self.find_one("ROPPONGI PASSION PIT")
+        assert program.archive_retry_count == 0
+        assert program.mark_retry_or_failed(MAX_RETRY_COUNT) == 1
+        program = self.find_one("ROPPONGI PASSION PIT")
+        assert program.archive_status == ArchiveStatusId.ARCHIVABLE.value
+        assert program.archive_retry_count == 1
+        assert [found.id for found in Program.find(["ROPPONGI PASSION PIT"])] == [program.id]
+
+    @pytest.mark.usefixtures("record_program")
+    def test_mark_retry_or_failed_exhausted(self) -> None:
+        """Method should mark the program failed once retries are exhausted."""
+        program = self.find_one("ROPPONGI PASSION PIT")
+        for _ in range(MAX_RETRY_COUNT - 1):
+            program.mark_retry_or_failed(MAX_RETRY_COUNT)
+        assert program.mark_retry_or_failed(MAX_RETRY_COUNT) == MAX_RETRY_COUNT
+        program = self.find_one("ROPPONGI PASSION PIT")
+        assert program.archive_status == ArchiveStatusId.FAILED.value
 
     @staticmethod
     def find_one(keyword: str) -> Program:

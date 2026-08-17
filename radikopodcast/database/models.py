@@ -144,6 +144,7 @@ class Program(ModelInitByXml[XmlParserProgram]):
     area_id: Mapped[Optional[str]] = mapped_column(String(255))  # noqa: UP045
     # Reason: To allow null in Python 3.9 with SQLAlchemy 2
     archive_status: Mapped[Optional[int]] = mapped_column(INTEGER)  # noqa: UP045
+    archive_retry_count: Mapped[int] = mapped_column(INTEGER, nullable=False, default=0, server_default="0")
 
     def init(self, xml_parser: XmlParserProgram) -> None:
         # Reason: "id" meets requirement of snake_case.
@@ -157,6 +158,7 @@ class Program(ModelInitByXml[XmlParserProgram]):
         self.date = xml_parser.date
         self.area_id = xml_parser.area_id
         self.archive_status = ArchiveStatusId.ARCHIVABLE.value
+        self.archive_retry_count = 0
 
     def mark_archivable(self) -> None:
         Program.mark(self, ArchiveStatusId.ARCHIVABLE)
@@ -179,6 +181,23 @@ class Program(ModelInitByXml[XmlParserProgram]):
             selected_program = session.query(Program).with_for_update().filter_by(id=program.id).one()
             selected_program.archive_status = archive_id.value
             session.commit()
+
+    def mark_retry_or_failed(self, max_retry_count: int) -> int:
+        """Atomically increment the retry count; mark archivable if retries remain, failed otherwise.
+
+        Returns:
+            The incremented retry count.
+        """
+        with SessionManager() as session:
+            selected_program = session.query(Program).with_for_update().filter_by(id=self.id).one()
+            selected_program.archive_retry_count = selected_program.archive_retry_count + 1
+            retry_count = selected_program.archive_retry_count
+            selected_program.archive_status = (
+                ArchiveStatusId.ARCHIVABLE.value if retry_count < max_retry_count else ArchiveStatusId.FAILED.value
+            )
+            session.commit()
+            self.archive_retry_count = retry_count
+            return retry_count
 
     @property
     def ft_string(self) -> str:
