@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """This module implements testing utility using SQLAlchemy."""
 
 from typing import TYPE_CHECKING

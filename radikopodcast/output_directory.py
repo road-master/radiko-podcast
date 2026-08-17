@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Output directory management for Radiko podcast archiving."""
 
 from logging import getLogger

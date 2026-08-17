@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Datetime for radiko specification."""
 
 from datetime import date

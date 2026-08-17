@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """This module implements database engine manager for unit testing."""
 
 from __future__ import annotations

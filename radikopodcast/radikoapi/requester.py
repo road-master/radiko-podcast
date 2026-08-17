@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """To unify error check and logging process."""
 
 from http import HTTPStatus

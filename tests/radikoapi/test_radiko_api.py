@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Tests for radiko_api.py."""
 
 from datetime import date

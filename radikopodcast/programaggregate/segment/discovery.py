@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Radiko segment discovery via the time-free endpoint."""
 
 from __future__ import annotations

@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Program schedule."""
 
 from __future__ import annotations

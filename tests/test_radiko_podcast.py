@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Tests for radiko_podcast.py."""
 
 import asyncio

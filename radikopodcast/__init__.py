@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Top-level package for radiko Podcast."""
 
 __author__ = """Master"""

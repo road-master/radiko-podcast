@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """XML converter."""
 
 from __future__ import annotations

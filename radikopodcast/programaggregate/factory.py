@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Radiko program aggregate archiver factory."""
 
 from __future__ import annotations

@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Stream spec factory."""
 
 from logging import getLogger

@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """This module implements SQLAlchemy database models."""
 
 from __future__ import annotations

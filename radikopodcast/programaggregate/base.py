@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Radiko program archiver base class."""
 
 from __future__ import annotations
