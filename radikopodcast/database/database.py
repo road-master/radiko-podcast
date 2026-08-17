@@ -2,12 +2,17 @@
 """Database."""
 
 from logging import getLogger
+from typing import TYPE_CHECKING
+from typing import cast
 
 from sqlalchemy import inspect
 from sqlalchemy import text
 
 from radikopodcast import Session
 from radikopodcast.database.models import Base
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
 
 
 class Database:
@@ -34,5 +39,7 @@ class Database:
         column_names = {column["name"] for column in inspect(engine).get_columns("programs")}
         if "archive_retry_count" in column_names:
             return
-        with engine.begin() as connection:
+        # Reason: Session.get_bind() is typed as Engine | Connection, but this Session is always
+        # bound to an Engine (see radikopodcast/__init__.py), so narrow the type for engine.begin().
+        with cast("Engine", engine).begin() as connection:
             connection.execute(text("ALTER TABLE programs ADD COLUMN archive_retry_count INTEGER NOT NULL DEFAULT 0"))

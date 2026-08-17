@@ -12,6 +12,7 @@ from pathlib import Path
 from shutil import copyfile
 from textwrap import dedent
 from typing import TYPE_CHECKING
+from typing import cast
 from unittest.mock import AsyncMock
 from unittest.mock import MagicMock
 
@@ -21,15 +22,18 @@ from click.testing import CliRunner
 from defusedxml import ElementTree
 from jinja2 import Template
 from radikoplaylist.master_playlist_client import MasterPlaylistClient
+from sqlalchemy import and_
 from sqlalchemy import text
 
 from radikopodcast.database.models import Program
+from radikopodcast.database.session_manager import SessionManager
 from radikopodcast.radiko_datetime import JST
 from radikopodcast.radikoxml.xml_converter import XmlConverterProgram
 from tests.test_radiko_stream_spec_factory import MasterPlaylist
 from tests.testlibraries.database_for_test import DatabaseForTest
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from collections.abc import Generator
 
     # Reason: The defusedxml's issue:
@@ -43,6 +47,21 @@ if TYPE_CHECKING:
     from sqlalchemy.orm.session import Session as SQLAlchemySession
 
 collect_ignore = ["setup.py"]
+
+
+@pytest.fixture
+def find_program_by_keyword() -> Callable[[str], Program]:
+    """Look up the first Program whose title contains the given keyword, ordered by ft ascending."""
+
+    def _find(keyword: str) -> Program:
+        with SessionManager() as session:
+            list_condition_keyword = [Program.title.like(f"%{keyword}%")]
+            return cast(
+                "Program",
+                session.query(Program).filter(and_(*list_condition_keyword)).order_by(Program.ft.asc()).first(),
+            )
+
+    return _find
 
 
 @pytest.fixture
