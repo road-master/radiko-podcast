@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Test for radiko_archiver.py."""
 
 import asyncio

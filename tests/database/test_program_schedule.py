@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Test for Database."""
 
 from datetime import datetime

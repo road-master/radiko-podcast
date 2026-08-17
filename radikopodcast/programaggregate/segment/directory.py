@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Segment directory context manager for Radiko time-free archiving."""
 
 from __future__ import annotations

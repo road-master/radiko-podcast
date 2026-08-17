@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Test for models.py."""
 
 from datetime import date

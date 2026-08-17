@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """XML parsers."""
 
 from __future__ import annotations

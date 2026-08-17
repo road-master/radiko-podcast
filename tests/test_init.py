@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Tests for radikopodcast/__init__.py."""
 
 from pathlib import Path

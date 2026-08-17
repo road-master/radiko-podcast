@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Tests for xml_parser.py."""
 
 import pytest

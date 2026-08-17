@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Tests for xmp_converter.py."""
 
 from datetime import date

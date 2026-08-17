@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Tests for radiko_timefree30_archiver.py."""
 
 from __future__ import annotations

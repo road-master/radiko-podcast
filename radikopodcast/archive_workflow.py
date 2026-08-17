@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Radiko Archiver."""
 
 from __future__ import annotations

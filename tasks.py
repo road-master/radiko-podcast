@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Tasks for maintaining the project.
 
 Execute 'invoke --list' for guidance on using Invoke

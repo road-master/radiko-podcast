@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Tests for radiko_stream_spec_factory.py."""
 
 from dataclasses import dataclass

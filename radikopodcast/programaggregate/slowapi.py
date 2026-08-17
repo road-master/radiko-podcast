@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Radiko program aggregate archiver for slow (non-radiko.jp) API endpoints."""
 
 from __future__ import annotations

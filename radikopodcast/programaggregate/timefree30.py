@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Radiko Time Free 30 program archiver."""
 
 from __future__ import annotations

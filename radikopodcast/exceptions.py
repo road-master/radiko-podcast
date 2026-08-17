@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """This module implements exceptions for this package."""
 
 # This comment avoids docformatter's issue:

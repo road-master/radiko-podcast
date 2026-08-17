@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """This module implements SQLAlchemy session life cycle to prevent forgetting close."""
 
 from __future__ import annotations

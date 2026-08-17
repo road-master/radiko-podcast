@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """Console script for radikopodcast."""
 
 from __future__ import annotations

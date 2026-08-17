@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Master
 """The radiko API."""
 
 from logging import getLogger
