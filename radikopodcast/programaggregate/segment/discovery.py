@@ -71,7 +71,7 @@ async def fetch_media_playlist_text(master_playlist: MasterPlaylist) -> MediaPla
 
 
 # Reason: Top-level function required for pickling in ProcessTaskPoolExecutor; all context must be explicit args.
-async def get_segment_datetimes(  # noqa: PLR0913 pylint: disable=too-many-arguments, too-many-positional-arguments
+async def get_segment_datetimes(  # noqa: PLR0913, PLR0917 pylint: disable=too-many-arguments, too-many-positional-arguments
     station_id: str,
     start_at: int,
     end_at: int,
