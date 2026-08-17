@@ -317,6 +317,17 @@ def record_program(
 
 
 @pytest.fixture
+# Reason: To refer other fixture. pylint: disable=redefined-outer-name
+def record_program_retried(record_program: SQLAlchemySession) -> SQLAlchemySession:
+    """Simulate a fixture program that has already exhausted 4 archive retries."""
+    record_program.query(Program).filter(Program.title.like("%ROPPONGI PASSION PIT%")).update(
+        {Program.archive_retry_count: 4},
+    )
+    record_program.commit()
+    return record_program
+
+
+@pytest.fixture
 # Reason: To refer other fixture. pylint: disable=unused-argument,redefined-outer-name
 def _mock_all(
     # Reason: Fixture can't use mark.usefixtures():

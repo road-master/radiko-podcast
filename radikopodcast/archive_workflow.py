@@ -16,13 +16,7 @@ if TYPE_CHECKING:
     from radikopodcast.database.models import Program
     from radikopodcast.programaggregate.factory import RadikoProgramAggregateToArchiveFactory
 
-_ARCHIVE_ERROR_MESSAGES: dict[type[Exception], str] = {
-    BadHttpStatusCodeError: (
-        "HTTP error archiving %s %s — station may not support this time-free type; marking failed."
-    ),
-    NoAvailableUrlError: "No available playlist URL for %s %s — URL may be unsupported; marking failed.",
-    RequestsConnectionError: "Connection error archiving %s %s — Radiko API unreachable; marking failed.",
-}
+MAX_ARCHIVE_RETRY_COUNT = 5
 
 
 class RadikoArchiveWorkflow:
@@ -69,11 +63,36 @@ class RadikoArchiveWorkflow:
             self.logger.debug("FFmpeg run cancelled.")
             program.mark_suspended()
             raise
-        except (BadHttpStatusCodeError, NoAvailableUrlError, RequestsConnectionError) as error:
+        except NoAvailableUrlError as error:
             self.logger.warning(
-                _ARCHIVE_ERROR_MESSAGES[type(error)],
+                "No available playlist URL for %s %s: %s — the station may not support this URL type; marking failed.",
                 program.station_id,
                 program.ft_string,
+                error,
             )
             program.mark_failed()
             raise
+        except (BadHttpStatusCodeError, RequestsConnectionError) as error:
+            self._retry_or_fail(program, error)
+            raise
+
+    def _retry_or_fail(self, program: Program, error: Exception) -> None:
+        """Requeue the program for transient errors; mark failed once retries are exhausted."""
+        retry_count = program.mark_retry_or_failed(MAX_ARCHIVE_RETRY_COUNT)
+        if retry_count < MAX_ARCHIVE_RETRY_COUNT:
+            self.logger.warning(
+                "Transient error archiving %s %s: %s (attempt %d/%d, will retry next cycle)",
+                program.station_id,
+                program.ft_string,
+                error,
+                retry_count,
+                MAX_ARCHIVE_RETRY_COUNT,
+            )
+            return
+        self.logger.error(
+            "Giving up archiving %s %s after %d attempts: %s",
+            program.station_id,
+            program.ft_string,
+            retry_count,
+            error,
+        )
