@@ -109,14 +109,12 @@ class TestGetSegmentDatetimes:
     @pytest.mark.usefixtures("mock_master_playlist_client")
     async def test_ignores_non_aac_lines(self, mocker: MockFixture) -> None:
         """Should skip comment lines and non-AAC URLs."""
-        playlist = dedent(
-            """\
+        playlist = dedent("""\
             #EXTM3U
             #EXT-X-TARGETDURATION:5
             https://example.com/20210116_050000_FMJ_001.aac
             #EXT-X-ENDLIST
-        """,
-        )
+        """)
         mock_response = AsyncMock()
         mock_response.raise_for_status = MagicMock()
         mock_response.text = AsyncMock(return_value=playlist)

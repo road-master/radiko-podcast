@@ -5,7 +5,7 @@ from __future__ import annotations
 
 # Reason: To prevent following error:
 #   E   sqlalchemy.orm.exc.MappedAnnotationError: Could not resolve all types within mapped annotation: "Mapped[datetime.datetime | None]".  Ensure all types are written correctly and are imported within the module in use.
-import datetime  # noqa: TC003
+import datetime as dt  # noqa: TC003
 from abc import abstractmethod
 from enum import IntEnum
 from typing import TYPE_CHECKING
@@ -132,14 +132,14 @@ class Program(ModelInitByXml[XmlParserProgram]):
     # Reason: To allow null in Python 3.9 with SQLAlchemy 2
     radiko_id: Mapped[Optional[str]] = mapped_column(String(255))  # noqa: UP045
     # Reason: To allow null in Python 3.9 with SQLAlchemy 2
-    to: Mapped[Optional[datetime.datetime]] = mapped_column(DATETIME)  # noqa: UP045
+    to: Mapped[Optional[dt.datetime]] = mapped_column(DATETIME)  # noqa: UP045
     # Reason: To allow null in Python 3.9 with SQLAlchemy 2
-    ft: Mapped[Optional[datetime.datetime]] = mapped_column(DATETIME)  # noqa: UP045
+    ft: Mapped[Optional[dt.datetime]] = mapped_column(DATETIME)  # noqa: UP045
     # Reason: To allow null in Python 3.9 with SQLAlchemy 2
     title: Mapped[Optional[str]] = mapped_column(String(255))  # noqa: UP045
     station_id: Mapped[str] = mapped_column(String(255), ForeignKey("stations.id"), nullable=False)
     # Reason: To allow null in Python 3.9 with SQLAlchemy 2
-    date: Mapped[Optional[datetime.date]] = mapped_column(DATE)  # noqa: UP045
+    date: Mapped[Optional[dt.date]] = mapped_column(DATE)  # noqa: UP045
     # Reason: To allow null in Python 3.9 with SQLAlchemy 2
     area_id: Mapped[Optional[str]] = mapped_column(String(255))  # noqa: UP045
     # Reason: To allow null in Python 3.9 with SQLAlchemy 2
@@ -214,7 +214,7 @@ class Program(ModelInitByXml[XmlParserProgram]):
         return RadikoDatetime.encode(self.to)
 
     @staticmethod
-    def is_empty(target_date: datetime.date) -> bool:
+    def is_empty(target_date: dt.date) -> bool:
         with SessionManager() as session:
             count = cast("tuple[int]", session.query(func.count(Program.id)).filter(Program.date == target_date).one())  # pylint: disable=not-callable
             return count == (0,)
@@ -234,7 +234,7 @@ class Program(ModelInitByXml[XmlParserProgram]):
             )
 
     @staticmethod
-    def delete(boundary_date: datetime.date) -> None:
+    def delete(boundary_date: dt.date) -> None:
         with SessionManager() as session:
             session.query(Program).filter(Program.date < boundary_date).delete()
 
