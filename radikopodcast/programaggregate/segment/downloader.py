@@ -14,10 +14,12 @@ from radikoplaylist import MasterPlaylistClient
 from radikoplaylist import TimeFree30DayMasterPlaylistRequest
 
 from radikopodcast.programaggregate.segment.gather import SiblingConsumingGather
+from radikopodcast.programaggregate.segment.retry import TransientErrorRetry
 from radikopodcast.radiko_datetime import RadikoDatetime
 
 if TYPE_CHECKING:
     import anyio
+    from radikoplaylist.master_playlist import MasterPlaylist
 
     from radikopodcast.programaggregate.segment.directory import SegmentDirectory
     from radikopodcast.programaggregate.segment.discovery import MasterPlaylistRequestFactory
@@ -55,11 +57,15 @@ class SegmentsDownloader:
         start_at = int(segment_dt.strftime(RadikoDatetime.FORMAT_CODE))
         end_at = int((segment_dt + timedelta(seconds=4)).strftime(RadikoDatetime.FORMAT_CODE))
         master_playlist_request = self.request_factory(self.station_id, start_at, end_at)
-        master_playlist = MasterPlaylistClient.get(
-            master_playlist_request,
-            area_id=self.area_id,
-            radiko_session=self.radiko_session,
-        )
+
+        async def get_master_playlist() -> MasterPlaylist:
+            return MasterPlaylistClient.get(
+                master_playlist_request,
+                area_id=self.area_id,
+                radiko_session=self.radiko_session,
+            )
+
+        master_playlist = await TransientErrorRetry().run(get_master_playlist)
         stream = ffmpeg.input(
             master_playlist.media_playlist_url,
             headers=master_playlist.headers,

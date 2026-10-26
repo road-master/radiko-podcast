@@ -17,6 +17,7 @@ from radikoplaylist import TimeFree30DayMasterPlaylistRequest
 from radikoplaylist.master_playlist_request import MasterPlaylistRequest
 
 from radikopodcast.programaggregate.segment.gather import SiblingConsumingGather
+from radikopodcast.programaggregate.segment.retry import TransientErrorRetry
 from radikopodcast.radiko_datetime import JST
 from radikopodcast.radiko_datetime import RadikoDatetime
 
@@ -80,10 +81,18 @@ async def get_segment_datetimes(  # noqa: PLR0913, PLR0917 pylint: disable=too-m
     request_factory: MasterPlaylistRequestFactory,
 ) -> list[datetime]:
     """Fetch media playlist and return the segment datetimes parsed from AAC URLs."""
-    master_playlist_request = request_factory(station_id, start_at, end_at)
-    master_playlist = MasterPlaylistClient.get(master_playlist_request, area_id=area_id, radiko_session=radiko_session)
-    text = await fetch_media_playlist_text(master_playlist)
-    return text.analyze_segment_datetimes()
+
+    async def fetch() -> list[datetime]:
+        master_playlist_request = request_factory(station_id, start_at, end_at)
+        master_playlist = MasterPlaylistClient.get(
+            master_playlist_request,
+            area_id=area_id,
+            radiko_session=radiko_session,
+        )
+        text = await fetch_media_playlist_text(master_playlist)
+        return text.analyze_segment_datetimes()
+
+    return await TransientErrorRetry().run(fetch)
 
 
 class SegmentsDiscovery:
