@@ -55,7 +55,7 @@ dev = [
 
 [project]
 name = "radikopodcast"
-version = "1.4.0"
+version = "1.4.1"
 description = "Automatic archiver for radiko program which queried by YAML file."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -145,7 +145,7 @@ repository = "https://github.com/road-master/radiko-podcast"
 skips = ["tests/*"]
 
 [tool.bumpversion]
-current_version = "1.4.0"
+current_version = "1.4.1"
 commit = true
 tag = true
 
