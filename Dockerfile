@@ -1,4 +1,4 @@
-FROM futureys/claude-code-python-development:20261019130000
+FROM futureys/claude-code-python-development:20261102135000
 RUN apt-get update && apt-get install --no-install-recommends -y \
     curl/stable \
     xz-utils/stable \
